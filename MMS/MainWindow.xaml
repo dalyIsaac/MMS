@@ -1,0 +1,404 @@
+﻿<Window x:Class="MMS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MMS"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="500" MinWidth="1516">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="StackPanel" x:Key="OptionsStackPanel" >
+                <Setter Property="Orientation" Value="Horizontal" />
+                <Setter Property="Margin" Value="4" />
+            </Style>
+            <Style TargetType="TextBlock" x:Key="DescriptionTextBlock" >
+                <Setter Property="Margin" Value="0,0,4,0" />
+                <Setter Property="Width" Value="70" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid ShowGridLines="True" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="500" />
+            <ColumnDefinition Width="500" />
+            <ColumnDefinition Width="500" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <!--Master and slave COM ports-->
+        <StackPanel Grid.Column="0">
+            <TextBlock Text="Hosted Master and Slave COM Ports" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock HorizontalAlignment="Center">
+                This requires 
+                <Hyperlink NavigateUri="https://sourceforge.net/projects/com0com/files/latest/download" RequestNavigate="Hyperlink_RequestNavigate">
+                    com0com
+                </Hyperlink>
+                to be installed on the system to connect two virtual COM ports
+            </TextBlock>
+
+            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <Grid HorizontalAlignment="Center" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Master COM port" />
+                <ListBox Name="SerialChooseMaster" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" Grid.Row="1">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Margin="4" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Text="Slave COM port" Grid.Column="2"/>
+                <ListBox Name="SerialChooseSlave" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" Grid.Row="1" Grid.Column="2">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Margin="4" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+            </Grid>
+            <TextBlock Text="Warning - the slave and master cannot use the same COM port" Foreground="Red" HorizontalAlignment="Center" Name="WarningMasterSlave" Visibility="Collapsed"/>
+
+        </StackPanel>
+
+        <!--Data input-->
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="Data input source" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock Text="Data input can be live from the IED or generated" HorizontalAlignment="Center" />
+            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <RadioButton Name="LiveInput" Checked="LiveInput_Checked" Margin="0,0,20,0">Live IED input</RadioButton>
+                <RadioButton Name="GenInput" Checked="GenInput_Checked" >Generated input</RadioButton>
+            </StackPanel>
+
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <!--LiveInputSettings-->
+            <Grid Name="LiveInputSettings" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="250" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
+                    <ListBox Name="SerialChooseIED" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Margin="4" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <StackPanel Style="{StaticResource OptionsStackPanel}">
+                        <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
+                        <TextBox Name="BaudRate" Text="38400" MaxWidth="60"/>
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource OptionsStackPanel}">
+                        <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                        <TextBox Name="DataBits" Text="8" MaxWidth="60"/>
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource OptionsStackPanel}">
+                        <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
+                        <ComboBox Name="ParityComboBox" SelectedIndex="0">
+                            <ComboBoxItem>
+                                <TextBlock Text="None" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Even" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Odd" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource OptionsStackPanel}">
+                        <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                        <ComboBox Name="StopBitsComboBox" SelectedIndex="0">
+                            <ComboBoxItem>
+                                <TextBlock Text="1" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="2" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource OptionsStackPanel}">
+                        <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
+                        <TextBox Name="Timeout" Text="400" MaxWidth="60"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.ColumnSpan="2" Visibility="Collapsed" Name="WarningIED" Grid.Row="1" >
+                    <TextBlock Text="Warning - the IED must use a different COM port" Foreground="Red" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+
+            <!--GenInputSettings-->
+            <StackPanel Name="GenInputSettings" Visibility="Collapsed" HorizontalAlignment="Center">
+
+                <CheckBox Content="0" />
+                <CheckBox Content="+9.99" />
+                <CheckBox Content="-9.99" />
+                <CheckBox Content="Address = value" />
+                <CheckBox Content="Maximum possible value" />
+                <CheckBox Content="Minimum possible value" />
+                <!--Do I need overflow?-->
+
+            </StackPanel>
+
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
+
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
+                <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
+                <TextBox Text="400" Name="RefreshRate" />
+            </StackPanel>
+
+        </StackPanel>
+
+        <!--Clients and settings-->
+        <StackPanel Grid.Column="2">
+            <TextBlock Text="PIM Clients" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock Text="If these devices are virtual simulators, this requires more com0com ports" HorizontalAlignment="Center" />
+            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+            <TextBlock Text="Number of clients" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <RadioButton Name="OneClient" Margin="0,0,20,0" Checked="OneClient_Checked">One client</RadioButton>
+                <RadioButton Name="TwoClients" Margin="0,0,20,0" Checked="TwoClients_Checked">Two clients</RadioButton>
+                <RadioButton Name="ThreeClients" Margin="0,0,20,0" Checked="ThreeClients_Checked">Three clients</RadioButton>
+            </StackPanel>
+
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+
+            <TabControl Name="clientTabs" Visibility="Collapsed">
+                <!--Client 1-->
+                <TabItem Header="Client 1" Name="Client1" Visibility="Collapsed" >
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="250" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
+                            <ListBox Name="Client1Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" >
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Margin="4" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client1BaudRate" Text="38400" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client1DataBits" Text="8" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client1ParityComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="None" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Even" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Odd" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client1StopBitsComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="1" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="2" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client1Timeout" Text="400" MaxWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                    </Grid>
+                </TabItem>
+                <!--Client 2-->
+                <TabItem Header="Client 2" Name="Client2" Visibility="Collapsed" >
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="250" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
+                            <ListBox Name="Client2Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Margin="4" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client2BaudRate" Text="38400" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client2DataBits" Text="8" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client2ParityComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="None" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Even" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Odd" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client2StopBitsComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="1" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="2" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client2Timeout" Text="400" MaxWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                
+                <!--Client 3-->
+                <TabItem Header="Client 3" Name="Client3" Visibility="Collapsed" >
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="250" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
+                            <ListBox Name="Client3Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Margin="4" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client3BaudRate" Text="38400" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client3DataBits" Text="8" MaxWidth="60"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client3ParityComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="None" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Even" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Odd" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <ComboBox Name="Client3StopBitsComboBox" SelectedIndex="0">
+                                    <ComboBoxItem>
+                                        <TextBlock Text="1" />
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="2" />
+                                    </ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource OptionsStackPanel}">
+                                <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
+                                <TextBox Name="Client3Timeout" Text="400" MaxWidth="60"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+
+            <TextBlock Foreground="Red" HorizontalAlignment="Center" Name="WarningClient" Visibility="Collapsed" />
+
+        </StackPanel>
+
+        <Button Grid.Row="1" Grid.Column="2" Content="Start" Name="Start" IsEnabled="False"/>
+    </Grid>
+</Window>
