@@ -54,8 +54,14 @@ namespace MMS
             SerialChooseSlave.ItemsSource = serialPorts;
         }
 
+        /// <summary>
+        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Selected values for master, slave, and IED
             object[] selected = new object[] 
             {
                 SerialChooseSlave.SelectedValue,
@@ -63,6 +69,7 @@ namespace MMS
                 SerialChooseIED.SelectedValue
             };
 
+            // Selected values for the clients
             object[] clients = new object[]
             {
                 Client1Serial.SelectedValue,
@@ -70,6 +77,7 @@ namespace MMS
                 Client3Serial.SelectedValue
             };
 
+            // Checks if the master and the slave have different COM ports, and that they're not null
             if (SerialChooseMaster.SelectedValue == SerialChooseSlave.SelectedValue && SerialChooseMaster.SelectedValue != null)
             {
                 WarningMasterSlave.Visibility = Visibility.Visible;
@@ -79,6 +87,7 @@ namespace MMS
                 WarningMasterSlave.Visibility = Visibility.Collapsed;
             }
 
+            // Checks if the master and the slave have different COM ports to the IED
             if ((SerialChooseIED.SelectedValue == SerialChooseMaster.SelectedValue || SerialChooseIED.SelectedValue == SerialChooseSlave.SelectedValue) && SerialChooseIED.SelectedValue != null)
             {
                 WarningIED.Visibility = Visibility.Visible;
@@ -88,6 +97,7 @@ namespace MMS
                 WarningIED.Visibility = Visibility.Collapsed;
             }
 
+            // Checks if the COM port used in the clients is not used for the master, slave, or IED
             foreach (object item in clients)
             {
                 int x = 0;
@@ -111,14 +121,56 @@ namespace MMS
                 }
             }
 
+            // Checks that there are no errors, and whether or not a connection can be initiated
+            if (WarningMasterSlave.Visibility == Visibility.Collapsed && WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed)
+            {
+                if (selected[0] != null && selected[1] != null)
+                {
+                    if (((bool)LiveInput.IsChecked && selected[2] != null) || ((bool)GenInput.IsChecked && 
+                        ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
+                    {
+                        int length = clients.Count(s => s != null);
+                        if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
+                        {
+                            Start.IsEnabled = true;
+                        }
+                        else
+                        {
+                            Start.IsEnabled = false;
+                        }
+                    }
+                    else
+                    {
+                        Start.IsEnabled = false;
+                    }
+                }
+                else
+                {
+                    Start.IsEnabled = false;
+                }
+            }
+            else
+            {
+                Start.IsEnabled = false;
+            }
         }
 
+        /// <summary>
+        /// Redirects the user to the com0com download link
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Shows the live input options for the user
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LiveInput_Checked(object sender, RoutedEventArgs e)
         {
             GenInputSettings.Visibility = Visibility.Collapsed;
@@ -126,10 +178,16 @@ namespace MMS
             SerialChooseIED.ItemsSource = serialPorts;
         }
 
+        /// <summary>
+        /// Shows the generated input options for the user, and removes user choice for the IED port
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GenInput_Checked(object sender, RoutedEventArgs e)
         {
             LiveInputSettings.Visibility = Visibility.Collapsed;
             GenInputSettings.Visibility = Visibility.Visible;
+            SerialChooseIED.SelectedItem = null;
         }
 
         private void OneClient_Checked(object sender, RoutedEventArgs e)

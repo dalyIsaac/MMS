@@ -84,7 +84,7 @@
             <TextBlock Text="Data input can be live from the IED or generated" HorizontalAlignment="Center" />
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="InputRadioButtons">
                 <RadioButton Name="LiveInput" Checked="LiveInput_Checked" Margin="0,0,20,0">Live IED input</RadioButton>
                 <RadioButton Name="GenInput" Checked="GenInput_Checked" >Generated input</RadioButton>
             </StackPanel>
@@ -160,12 +160,12 @@
             <!--GenInputSettings-->
             <StackPanel Name="GenInputSettings" Visibility="Collapsed" HorizontalAlignment="Center">
 
-                <CheckBox Content="0" />
-                <CheckBox Content="+9.99" />
-                <CheckBox Content="-9.99" />
-                <CheckBox Content="Address = value" />
-                <CheckBox Content="Maximum possible value" />
-                <CheckBox Content="Minimum possible value" />
+                <CheckBox Content="0" Name="ZeroValues"/>
+                <CheckBox Content="+9.99" Name="P9_99"/>
+                <CheckBox Content="-9.99" Name="N9_99"/>
+                <CheckBox Content="Address = value" Name="AddressIsValue"/>
+                <CheckBox Content="Maximum possible value" Name="MaxValue"/>
+                <CheckBox Content="Minimum possible value" Name="MinValue"/>
                 <!--Do I need overflow?-->
 
             </StackPanel>
