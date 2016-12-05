@@ -62,7 +62,7 @@ namespace MMS
         private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Selected values for master, slave, and IED
-            object[] selected = new object[] 
+            object[] selected = new object[]
             {
                 SerialChooseSlave.SelectedValue,
                 SerialChooseMaster.SelectedValue,
@@ -126,7 +126,7 @@ namespace MMS
             {
                 if (selected[0] != null && selected[1] != null)
                 {
-                    if (((bool)LiveInput.IsChecked && selected[2] != null) || ((bool)GenInput.IsChecked && 
+                    if (((bool)LiveInput.IsChecked && selected[2] != null) || ((bool)GenInput.IsChecked &&
                         ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
                     {
                         int length = clients.Count(s => s != null);
@@ -220,6 +220,11 @@ namespace MMS
             Client3.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Shows the user the refresh options
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RefreshBool_Checked(object sender, RoutedEventArgs e)
         {
             if ((bool)RefreshBool.IsChecked)
@@ -229,6 +234,52 @@ namespace MMS
             else
             {
                 RefreshStackPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Starts the test
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Start_Click(object sender, RoutedEventArgs e)
+        {
+            HostedMB.port = new SerialPort()
+            {
+                BaudRate = Convert.ToInt32(BaudRate.Text),
+                DataBits = Convert.ToInt32(DataBits.Text),
+            };
+            switch (ParityComboBox.Text)
+            {
+                case "None":
+                    HostedMB.port.Parity = Parity.None;
+                    break;
+                case "Odd":
+                    HostedMB.port.Parity = Parity.Odd;
+                    break;
+                case "Even":
+                    HostedMB.port.Parity = Parity.Even;
+                    break;
+            }
+            switch (StopBitsComboBox.Text)
+            {
+                case "1":
+                    HostedMB.port.StopBits = StopBits.One;
+                    break;
+                case "2":
+                    HostedMB.port.StopBits = StopBits.Two;
+                    break;
+            }
+
+            if ((bool)LiveInput.IsChecked)
+            {
+                HostedMB.port.PortName = (string)SerialChooseIED.SelectedItem;
+                HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+                HostedMB.Live();
+            }
+            else
+            {
+
             }
         }
     }

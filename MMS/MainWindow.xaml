@@ -399,6 +399,6 @@
 
         </StackPanel>
 
-        <Button Grid.Row="1" Grid.Column="2" Content="Start" Name="Start" IsEnabled="False"/>
+        <Button Grid.Row="1" Grid.Column="2" Content="Start" Name="Start" IsEnabled="False" Click="Start_Click"/>
     </Grid>
 </Window>
