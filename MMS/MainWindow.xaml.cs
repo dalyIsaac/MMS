@@ -51,7 +51,6 @@ namespace MMS
                 serialPorts.Remove(item);
             }
             itemsToDelete = null;
-            SerialChooseMaster.ItemsSource = serialPorts;
             SerialChooseSlave.ItemsSource = serialPorts;
         }
 
@@ -66,7 +65,6 @@ namespace MMS
             object[] selected = new object[]
             {
                 SerialChooseSlave.SelectedValue,
-                SerialChooseMaster.SelectedValue,
                 SerialChooseIED.SelectedValue
             };
 
@@ -78,18 +76,8 @@ namespace MMS
                 Client3Serial.SelectedValue
             };
 
-            // Checks if the master and the slave have different COM ports, and that they're not null
-            if (SerialChooseMaster.SelectedValue == SerialChooseSlave.SelectedValue && SerialChooseMaster.SelectedValue != null)
-            {
-                WarningMasterSlave.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                WarningMasterSlave.Visibility = Visibility.Collapsed;
-            }
-
             // Checks if the master and the slave have different COM ports to the IED
-            if ((SerialChooseIED.SelectedValue == SerialChooseMaster.SelectedValue || SerialChooseIED.SelectedValue == SerialChooseSlave.SelectedValue) && SerialChooseIED.SelectedValue != null)
+            if (SerialChooseIED.SelectedValue == SerialChooseSlave.SelectedValue && SerialChooseIED.SelectedValue != null)
             {
                 WarningIED.Visibility = Visibility.Visible;
             }
@@ -123,22 +111,15 @@ namespace MMS
             }
 
             // Checks that there are no errors, and whether or not a connection can be initiated
-            if (WarningMasterSlave.Visibility == Visibility.Collapsed && WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed)
+            if (WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed)
             {
-                if (selected[0] != null && selected[1] != null)
+                if (((bool)LiveInput.IsChecked && selected[1] != null) || ((bool)GenInput.IsChecked &&
+                    ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
                 {
-                    if (((bool)LiveInput.IsChecked && selected[2] != null) || ((bool)GenInput.IsChecked &&
-                        ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
+                    int length = clients.Count(s => s != null);
+                    if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
                     {
-                        int length = clients.Count(s => s != null);
-                        if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
-                        {
-                            Start.IsEnabled = true;
-                        }
-                        else
-                        {
-                            Start.IsEnabled = false;
-                        }
+                        Start.IsEnabled = true;
                     }
                     else
                     {
@@ -154,17 +135,6 @@ namespace MMS
             {
                 Start.IsEnabled = false;
             }
-        }
-
-        /// <summary>
-        /// Redirects the user to the com0com download link
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
-            e.Handled = true;
         }
 
         /// <summary>
@@ -272,16 +242,6 @@ namespace MMS
                     HostedMB.HMIPort.StopBits = StopBits.Two;
                     break;
             }
-
-            // Hosted Master Output port
-            HostedMB.HMOPort = new SerialPort()
-            {
-                PortName = (string)SerialChooseMaster.SelectedItem,
-                BaudRate = 115200,
-                DataBits = 8,
-                Parity = Parity.None,
-                StopBits = StopBits.One,
-            };
 
             // Hosted Slave port
             HostedMB.HSPort = new SerialPort()

@@ -58,8 +58,6 @@
                 </ListBox>
 
             </Grid>
-            <TextBlock Text="Warning - the slave and master cannot use the same COM port" Foreground="Red" HorizontalAlignment="Center" Name="WarningMasterSlave" Visibility="Collapsed"/>
-
         </StackPanel>
 
         <!--Data input-->

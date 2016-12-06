@@ -17,11 +17,6 @@ namespace MMS
         public static SerialPort HMIPort;
 
         /// <summary>
-        /// Hosted Master Output port
-        /// </summary>
-        public static SerialPort HMOPort;
-
-        /// <summary>
         /// Hosted Slave port
         /// </summary>
         public static SerialPort HSPort;
@@ -30,11 +25,6 @@ namespace MMS
         /// Timeout value for the hosted master receiving data
         /// </summary>
         public static int TimeOutValue;
-
-        /// <summary>
-        /// Hosted Master Output master
-        /// </summary>
-        private static IModbusSerialMaster HMOMaster;
 
         /// <summary>
         /// Hosted Slave Input slave
@@ -51,25 +41,21 @@ namespace MMS
             HMIPort.Open();
             IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HMIPort);
             master.Transport.ReadTimeout = TimeOutValue;
-            CreateHostedMaster();
             int counter = 0;
             counter = ScanIn(master, counter, 0, 54);
             counter = ScanIn(master, counter, 56, 108);
             counter = ScanIn(master, counter, 200, 272);
         }
 
-        private static void CreateHostedMaster()
-        {
-            HMOPort.Open();
-            HMOMaster = ModbusSerialMaster.CreateRtu(HMOPort);
-        }
-
+        /// <summary>
+        /// Creates the hosted slave
+        /// </summary>
         private static void CreateHostedSlave()
         {
             Thread.CurrentThread.Name = "CHS";
             HSPort.Open();
             HSIslave = ModbusSerialSlave.CreateRtu(1, HSPort);
-            HSIslave.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 65535,65535);
+            HSIslave.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
             HSIslave.Listen();
             HSIslave.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(TestEvent);
         }
@@ -77,17 +63,27 @@ namespace MMS
         private static void TestEvent(object sender, ModbusSlaveRequestEventArgs e)
         {
             Console.WriteLine("Hello, World!");
+            Console.ReadLine();
         }
 
+        /// <summary>
+        /// Scanns in data from the IED and writes it
+        /// </summary>
+        /// <param name="master"></param>
+        /// <param name="counter"></param>
+        /// <param name="index"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         private static int ScanIn(IModbusMaster master, int counter, int index, int max)
         {
-            for (int i = index; i < max; i++)
+            for (int i = index; i < max; i += 2)
             {
                 counter++;
 
-                // Write to slave here
                 ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
-                HMOMaster.WriteMultipleRegisters(1, (ushort)i, items);
+                float itemsFloat = ToFloat(items); // Checks that the data is correct
+                HSIslave.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
+                HSIslave.DataStore.InputRegisters[i + 2] = items[1];
             }
             return counter;
         }
