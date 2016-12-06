@@ -31,37 +31,8 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!--Master and slave COM ports-->
-        <StackPanel Grid.Column="0">
-            <TextBlock Text="Hosted Master and Slave COM Ports" FontSize="20" HorizontalAlignment="Center"/>
-
-            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
-
-            <Grid HorizontalAlignment="Center" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="20" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Text="Slave COM port" Grid.Column="2"/>
-                <ListBox Name="SerialChooseSlave" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" Grid.Row="1" Grid.Column="2">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="4" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-            </Grid>
-        </StackPanel>
-
         <!--Data input-->
-        <StackPanel Grid.Column="1">
+        <StackPanel >
             <TextBlock Text="Data input source" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock Text="Data input can be live from the IED or generated" HorizontalAlignment="Center" />
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
@@ -166,7 +137,7 @@
         </StackPanel>
 
         <!--Clients and settings-->
-        <StackPanel Grid.Column="2">
+        <StackPanel Grid.Column="1">
             <TextBlock Text="PIM Clients" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock Text="If these devices are virtual simulators, this requires more com0com ports" HorizontalAlignment="Center" />
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
