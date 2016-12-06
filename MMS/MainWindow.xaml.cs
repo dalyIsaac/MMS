@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -244,7 +245,8 @@ namespace MMS
         /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            HostedMB.port = new SerialPort()
+            // Hosted Master Input port
+            HostedMB.HMIPort = new SerialPort()
             {
                 BaudRate = Convert.ToInt32(BaudRate.Text),
                 DataBits = Convert.ToInt32(DataBits.Text),
@@ -252,30 +254,50 @@ namespace MMS
             switch (ParityComboBox.Text)
             {
                 case "None":
-                    HostedMB.port.Parity = Parity.None;
+                    HostedMB.HMIPort.Parity = Parity.None;
                     break;
                 case "Odd":
-                    HostedMB.port.Parity = Parity.Odd;
+                    HostedMB.HMIPort.Parity = Parity.Odd;
                     break;
                 case "Even":
-                    HostedMB.port.Parity = Parity.Even;
+                    HostedMB.HMIPort.Parity = Parity.Even;
                     break;
             }
             switch (StopBitsComboBox.Text)
             {
                 case "1":
-                    HostedMB.port.StopBits = StopBits.One;
+                    HostedMB.HMIPort.StopBits = StopBits.One;
                     break;
                 case "2":
-                    HostedMB.port.StopBits = StopBits.Two;
+                    HostedMB.HMIPort.StopBits = StopBits.Two;
                     break;
             }
 
+            // Hosted Master Output port
+            HostedMB.HMOPort = new SerialPort()
+            {
+                PortName = (string)SerialChooseMaster.SelectedItem,
+                BaudRate = 115200,
+                DataBits = 8,
+                Parity = Parity.None,
+                StopBits = StopBits.One,
+            };
+
+            // Hosted Slave port
+            HostedMB.HSPort = new SerialPort()
+            {
+                PortName = (string)SerialChooseSlave.SelectedItem,
+                BaudRate = 115200,
+                DataBits = 8,
+                Parity = Parity.None,
+                StopBits = StopBits.One,
+            };
+
             if ((bool)LiveInput.IsChecked)
             {
-                HostedMB.port.PortName = (string)SerialChooseIED.SelectedItem;
+                HostedMB.HMIPort.PortName = (string)SerialChooseIED.SelectedItem;
                 HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
-                HostedMB.Live();
+                new Thread(HostedMB.Live).Start(); // Starts static class in new thread
             }
             else
             {

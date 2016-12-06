@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MMS
@@ -11,9 +12,19 @@ namespace MMS
     public static class HostedMB
     {
         /// <summary>
-        /// New port for the hosted master
+        /// Hosted Master Input port
         /// </summary>
-        public static SerialPort port;
+        public static SerialPort HMIPort;
+
+        /// <summary>
+        /// Hosted Master Output port
+        /// </summary>
+        public static SerialPort HMOPort;
+
+        /// <summary>
+        /// Hosted Slave port
+        /// </summary>
+        public static SerialPort HSPort;
 
         /// <summary>
         /// Timeout value for the hosted master receiving data
@@ -21,27 +32,62 @@ namespace MMS
         public static int TimeOutValue;
 
         /// <summary>
+        /// Hosted Master Output master
+        /// </summary>
+        private static IModbusSerialMaster HMOMaster;
+
+        /// <summary>
+        /// Hosted Slave Input slave
+        /// </summary>
+        private static ModbusSerialSlave HSIslave;
+
+        /// <summary>
         /// Executes with live input
         /// </summary>
         public static void Live()
         {
-            port.Open();
-            IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(port);
+            new Thread(CreateHostedSlave).Start(); // Starts method in new thread
+            Thread.CurrentThread.Name = "Live";
+            HMIPort.Open();
+            IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HMIPort);
             master.Transport.ReadTimeout = TimeOutValue;
+            CreateHostedMaster();
             int counter = 0;
             counter = ScanIn(master, counter, 0, 54);
             counter = ScanIn(master, counter, 56, 108);
             counter = ScanIn(master, counter, 200, 272);
         }
 
-        private static Dictionary<int, float> collectedValues = new Dictionary<int, float>();
+        private static void CreateHostedMaster()
+        {
+            HMOPort.Open();
+            HMOMaster = ModbusSerialMaster.CreateRtu(HMOPort);
+        }
+
+        private static void CreateHostedSlave()
+        {
+            Thread.CurrentThread.Name = "CHS";
+            HSPort.Open();
+            HSIslave = ModbusSerialSlave.CreateRtu(1, HSPort);
+            HSIslave.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 65535,65535);
+            HSIslave.Listen();
+            HSIslave.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(TestEvent);
+        }
+
+        private static void TestEvent(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            Console.WriteLine("Hello, World!");
+        }
 
         private static int ScanIn(IModbusMaster master, int counter, int index, int max)
         {
-            for (int i = index; i < max; i += 2)
+            for (int i = index; i < max; i++)
             {
                 counter++;
-                collectedValues.Add((30001 + i), ToFloat(master.ReadInputRegisters(1, (ushort)i, 2)));
+
+                // Write to slave here
+                ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
+                HMOMaster.WriteMultipleRegisters(1, (ushort)i, items);
             }
             return counter;
         }

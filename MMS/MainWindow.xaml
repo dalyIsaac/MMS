@@ -34,13 +34,6 @@
         <!--Master and slave COM ports-->
         <StackPanel Grid.Column="0">
             <TextBlock Text="Hosted Master and Slave COM Ports" FontSize="20" HorizontalAlignment="Center"/>
-            <TextBlock HorizontalAlignment="Center">
-                This requires 
-                <Hyperlink NavigateUri="https://sourceforge.net/projects/com0com/files/latest/download" RequestNavigate="Hyperlink_RequestNavigate">
-                    com0com
-                </Hyperlink>
-                to be installed on the system to connect two virtual COM ports
-            </TextBlock>
 
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
@@ -54,15 +47,6 @@
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Text="Master COM port" />
-                <ListBox Name="SerialChooseMaster" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" Grid.Row="1">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="4" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
 
                 <TextBlock Text="Slave COM port" Grid.Column="2"/>
                 <ListBox Name="SerialChooseSlave" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" Grid.Row="1" Grid.Column="2">
