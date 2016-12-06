@@ -54,13 +54,20 @@ namespace MMS
         }
 
         /// <summary>
-        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// Checks if the start button can be enabled
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PIMConnected_Checked(object sender, RoutedEventArgs e)
         {
+            SerialChoose_SelectionChanged();
+        }
 
+        /// <summary>
+        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// </summary>
+        private void SerialChoose_SelectionChanged()
+        {
             // Selected values for the clients
             object[] clients = new object[]
             {
@@ -81,28 +88,35 @@ namespace MMS
                     }
                 }
 
-                //if ((selected.Contains(item) || x > 1) && item != null)
-                //{
-                //    WarningClient.Text = $"Warning, {(string)item} cannot be shared";
-                //    WarningClient.Visibility = Visibility.Visible;
-                //    break;
-                //}
-                //else
-                //{
-                //    WarningClient.Visibility = Visibility.Collapsed;
-                //}
+                if ((SerialChooseIED.SelectedValue == item || x > 1) && item != null)
+                {
+                    WarningClient.Text = $"Warning, {(string)item} cannot be shared";
+                    WarningClient.Visibility = Visibility.Visible;
+                    break;
+                }
+                else
+                {
+                    WarningClient.Visibility = Visibility.Collapsed;
+                }
             }
 
             // Checks that there are no errors, and whether or not a connection can be initiated
             if (WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed)
             {
-                if (((bool)LiveInput.IsChecked && SerialChooseIED.SelectedValue != null) || ((bool)GenInput.IsChecked &&
-                    ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
+                if ((bool)PIMConnected.IsChecked)
                 {
-                    int length = clients.Count(s => s != null);
-                    if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
+                    if (((bool)LiveInput.IsChecked && SerialChooseIED.SelectedValue != null) || ((bool)GenInput.IsChecked &&
+                    ((bool)ZeroValues.IsChecked || (bool)P9_99.IsChecked || (bool)N9_99.IsChecked || (bool)AddressIsValue.IsChecked || (bool)MaxValue.IsChecked || (bool)MinValue.IsChecked)))
                     {
-                        Start.IsEnabled = true;
+                        int length = clients.Count(s => s != null);
+                        if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
+                        {
+                            Start.IsEnabled = true;
+                        }
+                        else
+                        {
+                            Start.IsEnabled = false;
+                        }
                     }
                     else
                     {
@@ -118,6 +132,16 @@ namespace MMS
             {
                 Start.IsEnabled = false;
             }
+        }
+
+        /// <summary>
+        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SerialChoose_SelectionChanged();
         }
 
         /// <summary>
@@ -199,7 +223,7 @@ namespace MMS
         private void Start_Click(object sender, RoutedEventArgs e)
         {
             // Hosted Master Input port
-            HostedMB.HMIPort = new SerialPort()
+            HostedMB.HostedMasterPort = new SerialPort()
             {
                 BaudRate = Convert.ToInt32(BaudRate.Text),
                 DataBits = Convert.ToInt32(DataBits.Text),
@@ -207,59 +231,104 @@ namespace MMS
             switch (ParityComboBox.Text)
             {
                 case "None":
-                    HostedMB.HMIPort.Parity = Parity.None;
+                    HostedMB.HostedMasterPort.Parity = Parity.None;
                     break;
                 case "Odd":
-                    HostedMB.HMIPort.Parity = Parity.Odd;
+                    HostedMB.HostedMasterPort.Parity = Parity.Odd;
                     break;
                 case "Even":
-                    HostedMB.HMIPort.Parity = Parity.Even;
+                    HostedMB.HostedMasterPort.Parity = Parity.Even;
                     break;
             }
             switch (StopBitsComboBox.Text)
             {
                 case "1":
-                    HostedMB.HMIPort.StopBits = StopBits.One;
+                    HostedMB.HostedMasterPort.StopBits = StopBits.One;
                     break;
                 case "2":
-                    HostedMB.HMIPort.StopBits = StopBits.Two;
+                    HostedMB.HostedMasterPort.StopBits = StopBits.Two;
                     break;
             }
 
-
-            if ((bool)LiveInput.IsChecked)
+            #region Client 1 settings
+            HostedMB.Client1Port = new SerialPort()
             {
-                HostedMB.HMIPort.PortName = (string)SerialChooseIED.SelectedItem;
-                HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+                PortName = (string)Client1Serial.SelectedValue,
+                BaudRate = Convert.ToInt32(Client1BaudRate.Text),
+                DataBits = Convert.ToInt32(Client1DataBits.Text)
+            };
+            switch (Client1ParityComboBox.Text)
+            {
+                case "None":
+                    HostedMB.Client1Port.Parity = Parity.None;
+                    break;
+                case "Odd":
+                    HostedMB.Client1Port.Parity = Parity.Odd;
+                    break;
+                case "Even":
+                    HostedMB.Client1Port.Parity = Parity.Even;
+                    break;
+            }
+            switch (Client1StopBitsComboBox.Text)
+            {
+                case "1":
+                    HostedMB.Client1Port.StopBits = StopBits.One;
+                    break;
+                case "2":
+                    HostedMB.Client1Port.StopBits = StopBits.Two;
+                    break;
+            }
+            #endregion
 
-                // Hosted Serial Port settings
-                HostedMB.HSPort = new SerialPort()
+            if ((bool)OneClient.IsChecked)
+            {
+                new Thread(HostedMB.CreateHostedSlave1).Start();
+            }
+            else if ((bool)TwoClients.IsChecked)
+            {
+                Client2Settings();
+                new Thread(HostedMB.CreateHostedSlave1And2).Start();
+            }
+            else
+            {
+                Client2Settings();
+                #region Client 3 settings
+                HostedMB.Client3Port = new SerialPort()
                 {
-                    PortName = (string)Client1Serial.SelectedValue,
-                    BaudRate = Convert.ToInt32(Client1BaudRate.Text),
-                    DataBits = Convert.ToInt32(Client1DataBits.Text)
+                    PortName = (string)Client3Serial.SelectedValue,
+                    BaudRate = Convert.ToInt32(Client3BaudRate.Text),
+                    DataBits = Convert.ToInt32(Client3DataBits.Text)
                 };
-                switch (Client1ParityComboBox.Text)
+                switch (Client3ParityComboBox.Text)
                 {
                     case "None":
-                        HostedMB.HMIPort.Parity = Parity.None;
+                        HostedMB.Client3Port.Parity = Parity.None;
                         break;
                     case "Odd":
-                        HostedMB.HMIPort.Parity = Parity.Odd;
+                        HostedMB.Client3Port.Parity = Parity.Odd;
                         break;
                     case "Even":
-                        HostedMB.HMIPort.Parity = Parity.Even;
+                        HostedMB.Client3Port.Parity = Parity.Even;
                         break;
                 }
-                switch (Client1StopBitsComboBox.Text)
+                switch (Client3StopBitsComboBox.Text)
                 {
                     case "1":
-                        HostedMB.HMIPort.StopBits = StopBits.One;
+                        HostedMB.Client3Port.StopBits = StopBits.One;
                         break;
                     case "2":
-                        HostedMB.HMIPort.StopBits = StopBits.Two;
+                        HostedMB.Client3Port.StopBits = StopBits.Two;
                         break;
                 }
+                #endregion
+                new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
+            }
+
+            #region Live vs. Generated
+            if ((bool)LiveInput.IsChecked)
+            {
+                HostedMB.HostedMasterPort.PortName = (string)SerialChooseIED.SelectedItem;
+                HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
 
                 new Thread(HostedMB.Live).Start(); // Starts static class in new thread
             }
@@ -267,6 +336,42 @@ namespace MMS
             {
 
             }
+            #endregion
         }
+
+        /// <summary>
+        /// Sets the settings for client 2
+        /// </summary>
+        private void Client2Settings()
+        {
+            HostedMB.Client2Port = new SerialPort()
+            {
+                PortName = (string)Client2Serial.SelectedValue,
+                BaudRate = Convert.ToInt32(Client2BaudRate.Text),
+                DataBits = Convert.ToInt32(Client2DataBits.Text)
+            };
+            switch (Client2ParityComboBox.Text)
+            {
+                case "None":
+                    HostedMB.Client2Port.Parity = Parity.None;
+                    break;
+                case "Odd":
+                    HostedMB.Client2Port.Parity = Parity.Odd;
+                    break;
+                case "Even":
+                    HostedMB.Client2Port.Parity = Parity.Even;
+                    break;
+            }
+            switch (Client2StopBitsComboBox.Text)
+            {
+                case "1":
+                    HostedMB.Client2Port.StopBits = StopBits.One;
+                    break;
+                case "2":
+                    HostedMB.Client2Port.StopBits = StopBits.Two;
+                    break;
+            }
+        }
+
     }
 }

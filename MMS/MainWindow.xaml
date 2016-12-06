@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MMS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" MinWidth="1516">
+        Title="MainWindow" Height="500" Width="1008" MinWidth="1008">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -24,11 +24,10 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="500" />
             <ColumnDefinition Width="500" />
-            <ColumnDefinition Width="500" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
-            <RowDefinition />
+            <RowDefinition Height="44" />
         </Grid.RowDefinitions>
 
         <!--Data input-->
@@ -352,6 +351,10 @@
 
         </StackPanel>
 
-        <Button Grid.Row="1" Grid.Column="2" Content="Start" Name="Start" IsEnabled="False" Click="Start_Click"/>
+        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center">
+            <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
+            <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click"/>
+        </StackPanel>
+        
     </Grid>
 </Window>

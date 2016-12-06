@@ -14,12 +14,37 @@ namespace MMS
         /// <summary>
         /// Hosted Master Input port
         /// </summary>
-        public static SerialPort HMIPort;
+        public static SerialPort HostedMasterPort;
 
         /// <summary>
-        /// Hosted Slave port
+        /// Hosted Slave 1
         /// </summary>
-        public static SerialPort HSPort;
+        private static ModbusSerialSlave HostedSlave1;
+
+        /// <summary>
+        /// Hosted Slave 2
+        /// </summary>
+        private static ModbusSerialSlave HostedSlave2;
+
+        /// <summary>
+        /// Hosted Slave 3
+        /// </summary>
+        private static ModbusSerialSlave HostedSlave3;
+
+        /// <summary>
+        /// Client 1 port
+        /// </summary>
+        public static SerialPort Client1Port;
+
+        /// <summary>
+        /// Client 2 port
+        /// </summary>
+        public static SerialPort Client2Port;
+
+        /// <summary>
+        /// Client 3 port
+        /// </summary>
+        public static SerialPort Client3Port;
 
         /// <summary>
         /// Timeout value for the hosted master receiving data
@@ -27,65 +52,105 @@ namespace MMS
         public static int TimeOutValue;
 
         /// <summary>
-        /// Hosted Slave Input slave
-        /// </summary>
-        private static ModbusSerialSlave HSIslave;
-
-        /// <summary>
         /// Executes with live input
         /// </summary>
         public static void Live()
         {
-            new Thread(CreateHostedSlave).Start(); // Starts method in new thread
-            Thread.CurrentThread.Name = "Live";
-            HMIPort.Open();
-            IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HMIPort);
+            HostedMasterPort.Open();
+            IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HostedMasterPort);
             master.Transport.ReadTimeout = TimeOutValue;
-            int counter = 0;
-            counter = ScanIn(master, counter, 0, 54);
-            counter = ScanIn(master, counter, 56, 108);
-            counter = ScanIn(master, counter, 200, 272);
+            ScanIn(master, 0, 272);
         }
 
         /// <summary>
-        /// Creates the hosted slave
+        /// Creates hosted slave 1
         /// </summary>
-        private static void CreateHostedSlave()
+        public static void CreateHostedSlave1()
         {
-            Thread.CurrentThread.Name = "CHS";
-            HSPort.Open();
-            HSIslave = ModbusSerialSlave.CreateRtu(1, HSPort);
-            HSIslave.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
-            HSIslave.Listen();
-            HSIslave.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(TestEvent);
+            Client1Port.Open();
+            HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
+            HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
+            try
+            {
+                new Thread(HostedSlave1.Listen).Start();
+            }
+            catch (Exception) 
+            {
+                // Put an error catching thing here
+            }
         }
 
-        private static void TestEvent(object sender, ModbusSlaveRequestEventArgs e)
+        /// <summary>
+        /// References CreateHostedSlave1 and CreateHostedSlave2
+        /// </summary>
+        public static void CreateHostedSlave1And2()
         {
-            Console.WriteLine("Hello, World!");
-            Console.ReadLine();
+            CreateHostedSlave1();
+            CreateHostedSlave2();
+        }
+
+        /// <summary>
+        /// Creates hosted slave 2
+        /// </summary>
+        private static void CreateHostedSlave2()
+        {
+            Client2Port.Open();
+            HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
+            HostedSlave2.DataStore = HostedSlave1.DataStore;
+            try
+            {
+                new Thread(HostedSlave2.Listen).Start();
+            }
+            catch (Exception)
+            {
+                // Put an error catching thing here
+            }
+        }
+
+        /// <summary>
+        /// References CreateHostedSlave1, CreateHostedSlave2, and CreateHostedSlave3
+        /// </summary>
+        public static void CreateHostedSlave1And2And3()
+        {
+            CreateHostedSlave1();
+            CreateHostedSlave2();
+            CreateHostedSlave3();
+        }
+
+        /// <summary>
+        /// Creates hosted slave 3
+        /// </summary>
+        private static void CreateHostedSlave3()
+        {
+            Client3Port.Open();
+            HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
+            HostedSlave3.DataStore = HostedSlave1.DataStore;
+            try
+            {
+                HostedSlave3.Listen();
+            }
+            catch (Exception)
+            {
+                // Put an error catching thing here
+            }
         }
 
         /// <summary>
         /// Scanns in data from the IED and writes it
         /// </summary>
         /// <param name="master"></param>
-        /// <param name="counter"></param>
         /// <param name="index"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        private static int ScanIn(IModbusMaster master, int counter, int index, int max)
+        private static void ScanIn(IModbusMaster master, int index, int max)
         {
             for (int i = index; i < max; i += 2)
             {
-                counter++;
-
                 ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
                 float itemsFloat = ToFloat(items); // Checks that the data is correct
-                HSIslave.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
-                HSIslave.DataStore.InputRegisters[i + 2] = items[1];
+                HostedSlave1.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
+                HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
             }
-            return counter;
         }
 
         /// <summary>
