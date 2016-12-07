@@ -31,6 +31,7 @@ namespace MMS
         public MainWindow()
         {
             InitializeComponent();
+            GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue };
             serialPorts = SerialPort.GetPortNames().ToList();
             List<string> itemsToDelete = new List<string>();
             foreach (var item in serialPorts)
@@ -214,6 +215,11 @@ namespace MMS
         }
 
         /// <summary>
+        /// Contains a list of all the checkbox items
+        /// </summary>
+        private CheckBox[] GeneratedItemsCheckbox;
+
+        /// <summary>
         /// Shows the user the refresh options
         /// </summary>
         /// <param name="sender"></param>
@@ -227,6 +233,53 @@ namespace MMS
             else
             {
                 RefreshStackPanel.Visibility = Visibility.Collapsed;
+                if (!(bool)RefreshBool.IsChecked)
+                {
+                    foreach (var item in GeneratedItemsCheckbox)
+                    {
+                        item.IsChecked = false;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ensures that only one checkbox can be checked if the input is not refreshing, for generated settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Checkbox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!(bool)RefreshBool.IsChecked)
+            {
+                var checkedItem = new CheckBox();
+                foreach (var item in GeneratedItemsCheckbox)
+                {
+                    if ((bool)item.IsChecked)
+                    {
+                        checkedItem = item;
+                    }
+                    else
+                    {
+                        item.IsEnabled = false;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enables all the checkboxes if the checked one is unchecked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Checkbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!(bool)RefreshBool.IsChecked)
+            {
+                foreach (var item in GeneratedItemsCheckbox)
+                {
+                    item.IsEnabled = true;
+                }
             }
         }
 
@@ -482,5 +535,7 @@ namespace MMS
                 e.Handled = true;
             }
         }
+
+
     }
 }

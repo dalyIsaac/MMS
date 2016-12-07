@@ -53,7 +53,7 @@
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
             <!--LiveInputSettings-->
-            <Grid Name="LiveInputSettings" Visibility="Collapsed">
+            <Grid Name="LiveInputSettings" Visibility="Collapsed" HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="250" />
                     <ColumnDefinition Width="250" />
@@ -121,24 +121,21 @@
             <!--GenInputSettings-->
             <StackPanel Name="GenInputSettings" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,24,0,0">
 
-                <CheckBox Content="0" Name="ZeroValues" Margin="4" />
-                <CheckBox Content="+9.99" Name="P9_99" Margin="4" />
-                <CheckBox Content="-9.99" Name="N9_99" Margin="4" />
-                <CheckBox Content="Address = value" Name="AddressIsValue" Margin="4" />
-                <CheckBox Content="Maximum possible value" Name="MaxValue" Margin="4" />
-                <CheckBox Content="Minimum possible value" Name="MinValue" Margin="4" />
+                <CheckBox Content="0" Name="ZeroValues" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
+                <CheckBox Content="+9.99" Name="P9_99" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
+                <CheckBox Content="-9.99" Name="N9_99" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
+                <CheckBox Content="Address = value" Name="AddressIsValue" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
+                <CheckBox Content="Maximum possible value" Name="MaxValue" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
+                <CheckBox Content="Minimum possible value" Name="MinValue" Margin="4" Checked="Checkbox_Checked" Unchecked="Checkbox_Unchecked"/>
                 <!--Do I need overflow?-->
 
             </StackPanel>
 
-            
-
         </StackPanel>
+        
         <StackPanel Grid.Row="3">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
-
-            
 
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
