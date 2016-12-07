@@ -83,6 +83,23 @@ namespace MMS
             }
         }
 
+        public static List<float> GenInput;
+
+        public static void Generated()
+        {
+            if (RefreshData)
+            {
+
+            }
+            else
+            {
+                for (int i = 0; i < 272; i++)
+                {
+
+                }
+            }
+        }
+
         /// <summary>
         /// Creates hosted slave 1
         /// </summary>

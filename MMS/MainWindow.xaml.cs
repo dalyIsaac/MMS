@@ -415,7 +415,13 @@ namespace MMS
                 }
                 else
                 {
+                    if (!HostedMB.RefreshData)
+                    {
+                        foreach (var item in GeneratedItemsCheckbox)
+                        {
 
+                        }
+                    }
                 }
                 #endregion
             }
@@ -424,6 +430,26 @@ namespace MMS
                 KillThreads();
                 Start.Content = "Start";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+            }
+        }
+
+        private (float outputValue, bool AddressIsValueBool) GenInputValue(CheckBox checkbox)
+        {
+            switch (checkbox.Name)
+            {
+                case "+9.99":
+                    return (9.99F, false);
+                case "-9.99":
+                    return (-9.99F, false);
+                case "AddressIsValue":
+                    return (0, true);
+                case "MaxValue":
+                    return (170141163178059628080016879768630000000F, false);
+                case "MinValue":
+                    return (-170141163178059628080016879768630000000F, false);
+                case "0":
+                default:
+                    return (0, false);
             }
         }
 
