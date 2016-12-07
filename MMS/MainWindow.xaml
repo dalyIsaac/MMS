@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MMS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="1008" MinWidth="1008">
+        Title="MainWindow" Height="500" Width="1008" MinWidth="1008"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -128,9 +129,12 @@
 
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
-                <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
-                <TextBox Text="400" Name="RefreshRate" />
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
+                    <TextBox Text="400" Name="RefreshRate" TextChanged="RefreshRate_TextChanged"/>
+                </StackPanel>
+                <TextBlock Text="Warning - the refresh rate must be a positive integer value" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningRefreshRate" />
             </StackPanel>
 
         </StackPanel>
@@ -353,7 +357,7 @@
 
         <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center">
             <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
-            <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click"/>
+            <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57"/>
         </StackPanel>
         
     </Grid>

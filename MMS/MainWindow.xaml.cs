@@ -168,6 +168,11 @@ namespace MMS
             SerialChooseIED.SelectedItem = null;
         }
 
+        /// <summary>
+        /// Shows only a single client for the user to set
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OneClient_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
@@ -177,6 +182,11 @@ namespace MMS
             Client3.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Shows two clients for the user to set
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TwoClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
@@ -187,6 +197,11 @@ namespace MMS
             Client3.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Shows three clients for the user to set
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ThreeClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
@@ -216,127 +231,167 @@ namespace MMS
         }
 
         /// <summary>
-        /// Starts the test
+        /// Starts or kills the test
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            // Hosted Master Input port
-            HostedMB.HostedMasterPort = new SerialPort()
+            if ((string)Start.Content == "Start")
             {
-                BaudRate = Convert.ToInt32(BaudRate.Text),
-                DataBits = Convert.ToInt32(DataBits.Text),
-            };
-            switch (ParityComboBox.Text)
-            {
-                case "None":
-                    HostedMB.HostedMasterPort.Parity = Parity.None;
-                    break;
-                case "Odd":
-                    HostedMB.HostedMasterPort.Parity = Parity.Odd;
-                    break;
-                case "Even":
-                    HostedMB.HostedMasterPort.Parity = Parity.Even;
-                    break;
-            }
-            switch (StopBitsComboBox.Text)
-            {
-                case "1":
-                    HostedMB.HostedMasterPort.StopBits = StopBits.One;
-                    break;
-                case "2":
-                    HostedMB.HostedMasterPort.StopBits = StopBits.Two;
-                    break;
-            }
+                Start.Content = "Stop";
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
 
-            #region Client 1 settings
-            HostedMB.Client1Port = new SerialPort()
-            {
-                PortName = (string)Client1Serial.SelectedValue,
-                BaudRate = Convert.ToInt32(Client1BaudRate.Text),
-                DataBits = Convert.ToInt32(Client1DataBits.Text)
-            };
-            switch (Client1ParityComboBox.Text)
-            {
-                case "None":
-                    HostedMB.Client1Port.Parity = Parity.None;
-                    break;
-                case "Odd":
-                    HostedMB.Client1Port.Parity = Parity.Odd;
-                    break;
-                case "Even":
-                    HostedMB.Client1Port.Parity = Parity.Even;
-                    break;
-            }
-            switch (Client1StopBitsComboBox.Text)
-            {
-                case "1":
-                    HostedMB.Client1Port.StopBits = StopBits.One;
-                    break;
-                case "2":
-                    HostedMB.Client1Port.StopBits = StopBits.Two;
-                    break;
-            }
-            #endregion
-
-            if ((bool)OneClient.IsChecked)
-            {
-                new Thread(HostedMB.CreateHostedSlave1).Start();
-            }
-            else if ((bool)TwoClients.IsChecked)
-            {
-                Client2Settings();
-                new Thread(HostedMB.CreateHostedSlave1And2).Start();
-            }
-            else
-            {
-                Client2Settings();
-                #region Client 3 settings
-                HostedMB.Client3Port = new SerialPort()
+                #region Client 1 settings
+                HostedMB.Client1Port = new SerialPort()
                 {
-                    PortName = (string)Client3Serial.SelectedValue,
-                    BaudRate = Convert.ToInt32(Client3BaudRate.Text),
-                    DataBits = Convert.ToInt32(Client3DataBits.Text)
+                    PortName = (string)Client1Serial.SelectedValue,
+                    BaudRate = Convert.ToInt32(Client1BaudRate.Text),
+                    DataBits = Convert.ToInt32(Client1DataBits.Text)
                 };
-                switch (Client3ParityComboBox.Text)
+                switch (Client1ParityComboBox.Text)
                 {
                     case "None":
-                        HostedMB.Client3Port.Parity = Parity.None;
+                        HostedMB.Client1Port.Parity = Parity.None;
                         break;
                     case "Odd":
-                        HostedMB.Client3Port.Parity = Parity.Odd;
+                        HostedMB.Client1Port.Parity = Parity.Odd;
                         break;
                     case "Even":
-                        HostedMB.Client3Port.Parity = Parity.Even;
+                        HostedMB.Client1Port.Parity = Parity.Even;
                         break;
                 }
-                switch (Client3StopBitsComboBox.Text)
+                switch (Client1StopBitsComboBox.Text)
                 {
                     case "1":
-                        HostedMB.Client3Port.StopBits = StopBits.One;
+                        HostedMB.Client1Port.StopBits = StopBits.One;
                         break;
                     case "2":
-                        HostedMB.Client3Port.StopBits = StopBits.Two;
+                        HostedMB.Client1Port.StopBits = StopBits.Two;
                         break;
                 }
                 #endregion
-                new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
-            }
 
-            #region Live vs. Generated
-            if ((bool)LiveInput.IsChecked)
-            {
-                HostedMB.HostedMasterPort.PortName = (string)SerialChooseIED.SelectedItem;
-                HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+                // Specifies the creation of slaves for clients
+                // All the slaves are created on the same thread
+                if ((bool)OneClient.IsChecked)
+                {
+                    new Thread(HostedMB.CreateHostedSlave1).Start();
+                }
+                else if ((bool)TwoClients.IsChecked)
+                {
+                    Client2Settings();
+                    new Thread(HostedMB.CreateHostedSlave1And2).Start();
+                }
+                else
+                {
+                    Client2Settings();
+                    #region Client 3 settings
+                    HostedMB.Client3Port = new SerialPort()
+                    {
+                        PortName = (string)Client3Serial.SelectedValue,
+                        BaudRate = Convert.ToInt32(Client3BaudRate.Text),
+                        DataBits = Convert.ToInt32(Client3DataBits.Text)
+                    };
+                    switch (Client3ParityComboBox.Text)
+                    {
+                        case "None":
+                            HostedMB.Client3Port.Parity = Parity.None;
+                            break;
+                        case "Odd":
+                            HostedMB.Client3Port.Parity = Parity.Odd;
+                            break;
+                        case "Even":
+                            HostedMB.Client3Port.Parity = Parity.Even;
+                            break;
+                    }
+                    switch (Client3StopBitsComboBox.Text)
+                    {
+                        case "1":
+                            HostedMB.Client3Port.StopBits = StopBits.One;
+                            break;
+                        case "2":
+                            HostedMB.Client3Port.StopBits = StopBits.Two;
+                            break;
+                    }
+                    #endregion
+                    new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
+                }
 
-                new Thread(HostedMB.Live).Start(); // Starts static class in new thread
+                HostedMB.RefreshData = (bool)RefreshBool.IsChecked;
+                if (HostedMB.RefreshData)
+                {
+                    HostedMB.RefreshFreq = Convert.ToInt32(RefreshRate.Text);
+                }
+
+                #region Live vs. Generated
+                if ((bool)LiveInput.IsChecked)
+                {
+                    #region Hosted Master Port settings
+                    HostedMB.HostedMasterPort = new SerialPort()
+                    {
+                        PortName = (string)SerialChooseIED.SelectedItem,
+                        BaudRate = Convert.ToInt32(BaudRate.Text),
+                        DataBits = Convert.ToInt32(DataBits.Text),
+                    };
+                    switch (ParityComboBox.Text)
+                    {
+                        case "None":
+                            HostedMB.HostedMasterPort.Parity = Parity.None;
+                            break;
+                        case "Odd":
+                            HostedMB.HostedMasterPort.Parity = Parity.Odd;
+                            break;
+                        case "Even":
+                            HostedMB.HostedMasterPort.Parity = Parity.Even;
+                            break;
+                    }
+                    switch (StopBitsComboBox.Text)
+                    {
+                        case "1":
+                            HostedMB.HostedMasterPort.StopBits = StopBits.One;
+                            break;
+                        case "2":
+                            HostedMB.HostedMasterPort.StopBits = StopBits.Two;
+                            break;
+                    }
+                    #endregion
+                    HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+
+                    new Thread(HostedMB.Live).Start(); // Starts static class in new thread
+                }
+                else
+                {
+
+                }
+                #endregion
             }
             else
             {
-
+                KillThreads();
+                Start.Content = "Start";
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
             }
-            #endregion
+        }
+
+        /// <summary>
+        /// Kills currently running background processes for clients
+        /// </summary>
+        private void KillThreads()
+        {
+            if (HostedMB.HostedMasterPort != null)
+            {
+                HostedMB.HostedMasterPort.Close();
+            }
+            HostedMB.Client1Port.Close();
+            if (HostedMB.Client2Port != null)
+            {
+                HostedMB.Client2Port.Close();
+            }
+            if (HostedMB.Client3Port != null)
+            {
+                HostedMB.Client3Port.Close();
+            }
         }
 
         /// <summary>
@@ -373,5 +428,37 @@ namespace MMS
             }
         }
 
+        /// <summary>
+        /// Checks that the refresh rate is available
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RefreshRate_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                int test = Convert.ToInt32(RefreshRate.Text);
+                if (test <= 0)
+                {
+                    WarningRefreshRate.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    WarningRefreshRate.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception)
+            {
+                if (WarningRefreshRate != null)
+                {
+                    WarningRefreshRate.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            KillThreads();
+        }
     }
 }

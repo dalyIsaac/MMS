@@ -52,6 +52,16 @@ namespace MMS
         public static int TimeOutValue;
 
         /// <summary>
+        /// Contains the user's setting whether the data should be continually refreshed
+        /// </summary>
+        public static bool RefreshData;
+
+        /// <summary>
+        /// Contains the user's settings on the frequency of the data input refreshing
+        /// </summary>
+        public static int RefreshFreq;
+
+        /// <summary>
         /// Executes with live input
         /// </summary>
         public static void Live()
@@ -59,7 +69,18 @@ namespace MMS
             HostedMasterPort.Open();
             IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HostedMasterPort);
             master.Transport.ReadTimeout = TimeOutValue;
-            ScanIn(master, 0, 272);
+            if (RefreshData)
+            {
+                while (true)
+                {
+                    ScanIn(master, 0, 272);
+                    Thread.Sleep(RefreshFreq);
+                }
+            }
+            else
+            {
+                ScanIn(master, 0, 272);
+            }
         }
 
         /// <summary>
@@ -144,13 +165,21 @@ namespace MMS
         /// <returns></returns>
         private static void ScanIn(IModbusMaster master, int index, int max)
         {
-            for (int i = index; i < max; i += 2)
+            try
             {
-                ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
-                float itemsFloat = ToFloat(items); // Checks that the data is correct
-                HostedSlave1.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
-                HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
+                for (int i = index; i < max; i += 2)
+                {
+                    ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
+                    float itemsFloat = ToFloat(items); // Checks that the data is correct
+                    HostedSlave1.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
+                    HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
+                }
             }
+            catch (Exception)
+            {
+                Thread.CurrentThread.Abort();
+            }
+            
         }
 
         /// <summary>
