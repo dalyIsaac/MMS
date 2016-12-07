@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:MMS"
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="1008" MinWidth="1008"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        >
 
     <Window.Resources>
         <ResourceDictionary>

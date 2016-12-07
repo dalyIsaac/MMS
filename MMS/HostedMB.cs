@@ -73,32 +73,88 @@ namespace MMS
             {
                 while (true)
                 {
-                    ScanIn(master, 0, 272);
+                    ScanIn(master);
                     Thread.Sleep(RefreshFreq);
                 }
             }
             else
             {
-                ScanIn(master, 0, 272);
+                ScanIn(master);
             }
         }
 
-        public static List<float> GenInput;
-
-        public static void Generated()
+        public static void Generated(List<string> input)
         {
-            if (RefreshData)
+            bool status = true;
+            while (status)
             {
-
-            }
-            else
-            {
-                for (int i = 0; i < 272; i++)
+                foreach (var item in input)
                 {
-
+                    switch (item)
+                    {
+                        case "ZeroValues":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(new ushort[] { 0, 0 }, i);
+                            }
+                            break;
+                        case "P9_99":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(FloatToBinary(9.99F), i);
+                            }
+                            break;
+                        case "N9_99":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(FloatToBinary(-9.99F), i);
+                            }
+                            break;
+                        case "AddressIsValue":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(FloatToBinary(30001 + i), i);
+                            }
+                            break;
+                        case "MaxValue":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(FloatToBinary(170141163178059628080016879768630000000F), i);
+                            }
+                            break;
+                        case "MinValue":
+                            for (int i = 0; i < 272; i += 2)
+                            {
+                                WriteValues(FloatToBinary(-170141163178059628080016879768630000000F), i);
+                            }
+                            break;
+                    }
+                    if (!RefreshData)
+                    {
+                        status = false;
+                    }
+                    else
+                    {
+                        Thread.Sleep(RefreshFreq);
+                    }
                 }
+                status = MainWindow.AppStatus;
             }
         }
+
+        /// <summary>
+        /// Writes the generated values into the slave data store
+        /// </summary>
+        private static void WriteValues(ushort[] items, int i)
+        {
+            HostedSlave1.DataStore.InputRegisters[i + 1] = items[0];
+            HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
+        }
+
+        /// <summary>
+        /// Set to true when the datastore has been completed
+        /// </summary>
+        public static bool CreateHostedSlave1Status = false;
 
         /// <summary>
         /// Creates hosted slave 1
@@ -108,6 +164,7 @@ namespace MMS
             Client1Port.Open();
             HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
             HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
+            CreateHostedSlave1Status = true;
             new Thread(HostedSlave1.Listen).Start();
         }
 
@@ -159,16 +216,15 @@ namespace MMS
         /// <param name="index"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        private static void ScanIn(IModbusMaster master, int index, int max)
+        private static void ScanIn(IModbusMaster master)
         {
             try
             {
-                for (int i = index; i < max; i += 2)
+                for (int i = 0; i < 272; i += 2)
                 {
                     ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
-                    float itemsFloat = ToFloat(items); // Checks that the data is correct
-                    HostedSlave1.DataStore.InputRegisters[i + 1] = items[0]; // Consider moving to another module
-                    HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
+                    //float itemsFloat = BinaryToFloat(items); // Checks that the data is correct
+                    WriteValues(items, i);
                 }
             }
             catch (Exception)
@@ -183,7 +239,7 @@ namespace MMS
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
-        private static float ToFloat(ushort[] values)
+        private static float BinaryToFloat(ushort[] values)
         {
             byte[] asByte = new byte[] {
                 (byte)(values[1] % 256),
@@ -194,6 +250,38 @@ namespace MMS
             float result = BitConverter.ToSingle(asByte, 0);
 
             return result;
+        }
+
+        /// <summary>
+        /// Converts float to ushort values for input into a register
+        /// Code source: https://www.codeproject.com/Questions/484209/Convertplusfloatplustoplusbinary
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static ushort[] FloatToBinary(float value)
+        {
+            int bitCount = sizeof(float) * 8; // never rely on your knowledge of the size
+            char[] result = new char[bitCount]; // better not use string, to avoid ineffective string concatenation repeated in a loop
+
+            // now, most important thing: (int)value would be "semantic" cast of the same
+            // mathematical value (with possible rounding), something we don't want; so:
+            int intValue = System.BitConverter.ToInt32(BitConverter.GetBytes(value), 0);
+
+            for (int bit = 0; bit < bitCount; ++bit)
+            {
+                int maskedValue = intValue & (1 << bit); // this is how shift and mask is done.
+                if (maskedValue > 0)
+                    maskedValue = 1;
+                // at this point, masked value is either int 0 or 1
+                result[bitCount - bit - 1] = maskedValue.ToString()[0]; // bits go right-to-left in usual Western Arabic-based notation
+            }
+
+            string stringResult = new string(result);
+
+            string firstHalf = stringResult.Substring(0, (stringResult.Length / 2));
+            string secondHalf = stringResult.Substring((stringResult.Length / 2), (stringResult.Length / 2));
+
+            return new ushort[] { Convert.ToUInt16(firstHalf, 2), Convert.ToUInt16(secondHalf, 2) };
         }
     }
 }

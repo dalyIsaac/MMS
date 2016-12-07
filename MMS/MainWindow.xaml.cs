@@ -292,9 +292,6 @@ namespace MMS
         {
             if ((string)Start.Content == "Start")
             {
-                Start.Content = "Stop";
-                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
-
                 #region Client 1 settings
                 HostedMB.Client1Port = new SerialPort()
                 {
@@ -371,11 +368,20 @@ namespace MMS
                     new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
                 }
 
+                // Ensures that data input does not begin before the data store is created
+                while (!HostedMB.CreateHostedSlave1Status)
+                {
+
+                }
+
                 HostedMB.RefreshData = (bool)RefreshBool.IsChecked;
                 if (HostedMB.RefreshData)
                 {
                     HostedMB.RefreshFreq = Convert.ToInt32(RefreshRate.Text);
                 }
+
+                Start.Content = "Stop";
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
 
                 #region Live vs. Generated
                 if ((bool)LiveInput.IsChecked)
@@ -415,13 +421,16 @@ namespace MMS
                 }
                 else
                 {
-                    if (!HostedMB.RefreshData)
-                    {
-                        foreach (var item in GeneratedItemsCheckbox)
-                        {
+                    List<string> GenItemsString = new List<string>();
 
+                    foreach (var item in GeneratedItemsCheckbox)
+                    {
+                        if ((bool)item.IsChecked)
+                        {
+                            GenItemsString.Add(item.Name);
                         }
                     }
+                    new Thread(() => HostedMB.Generated(GenItemsString)).Start();
                 }
                 #endregion
             }
@@ -430,26 +439,6 @@ namespace MMS
                 KillThreads();
                 Start.Content = "Start";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
-            }
-        }
-
-        private (float outputValue, bool AddressIsValueBool) GenInputValue(CheckBox checkbox)
-        {
-            switch (checkbox.Name)
-            {
-                case "+9.99":
-                    return (9.99F, false);
-                case "-9.99":
-                    return (-9.99F, false);
-                case "AddressIsValue":
-                    return (0, true);
-                case "MaxValue":
-                    return (170141163178059628080016879768630000000F, false);
-                case "MinValue":
-                    return (-170141163178059628080016879768630000000F, false);
-                case "0":
-                default:
-                    return (0, false);
             }
         }
 
@@ -538,11 +527,19 @@ namespace MMS
             }
         }
 
+                public static bool AppStatus = true;
+
+        /// <summary>
+        /// Kills all the threads and the program
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             KillThreads();
+            AppStatus = false;
+            Application.Current.Shutdown();
         }
-
         /// <summary>
         /// Shows the user the com0com settings or downloads it for them in a browser
         /// </summary>
@@ -561,7 +558,5 @@ namespace MMS
                 e.Handled = true;
             }
         }
-
-
     }
 }
