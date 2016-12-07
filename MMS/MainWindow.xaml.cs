@@ -377,13 +377,16 @@ namespace MMS
         /// <summary>
         /// Kills currently running background processes for clients
         /// </summary>
-        private void KillThreads()
+        public static void KillThreads()
         {
             if (HostedMB.HostedMasterPort != null)
             {
                 HostedMB.HostedMasterPort.Close();
             }
-            HostedMB.Client1Port.Close();
+            if (HostedMB.Client1Port != null)
+            {
+                HostedMB.Client1Port.Close();
+            }
             if (HostedMB.Client2Port != null)
             {
                 HostedMB.Client2Port.Close();
@@ -459,6 +462,25 @@ namespace MMS
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             KillThreads();
+        }
+
+        /// <summary>
+        /// Shows the user the com0com settings or downloads it for them in a browser
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+                e.Handled = true;
+            }
+            catch (Exception)
+            {
+                Process.Start(new ProcessStartInfo("https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/powersdr-iq/setup_com0com_W7_x64_signed.exe"));
+                e.Handled = true;
+            }
         }
     }
 }

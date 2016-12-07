@@ -21,27 +21,35 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid ShowGridLines="True" >
+    <Grid >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="500" />
-            <ColumnDefinition Width="500" />
+            <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
-            <RowDefinition Height="44" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            
+
         </Grid.RowDefinitions>
 
         <!--Data input-->
-        <StackPanel >
+        <StackPanel>
             <TextBlock Text="Data input source" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock Text="Data input can be live from the IED or generated" HorizontalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Row="1">
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="InputRadioButtons">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="InputRadioButtons" Margin="0,0,0,8">
                 <RadioButton Name="LiveInput" Checked="LiveInput_Checked" Margin="0,0,20,0">Live IED input</RadioButton>
                 <RadioButton Name="GenInput" Checked="GenInput_Checked" >Generated input</RadioButton>
             </StackPanel>
+        </StackPanel>
 
+        <StackPanel Grid.Row="2">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
             <!--LiveInputSettings-->
@@ -56,7 +64,7 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
+                    <TextBlock Text="IED COM port" Margin="8,24,4,4" HorizontalAlignment="Center"/>
                     <ListBox Name="SerialChooseIED" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -66,7 +74,7 @@
                     </ListBox>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                <StackPanel Grid.Column="2" Margin="0,24,0,0" HorizontalAlignment="Center">
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
                         <TextBox Name="BaudRate" Text="38400" MaxWidth="60"/>
@@ -111,23 +119,26 @@
             </Grid>
 
             <!--GenInputSettings-->
-            <StackPanel Name="GenInputSettings" Visibility="Collapsed" HorizontalAlignment="Center">
+            <StackPanel Name="GenInputSettings" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,24,0,0">
 
-                <CheckBox Content="0" Name="ZeroValues"/>
-                <CheckBox Content="+9.99" Name="P9_99"/>
-                <CheckBox Content="-9.99" Name="N9_99"/>
-                <CheckBox Content="Address = value" Name="AddressIsValue"/>
-                <CheckBox Content="Maximum possible value" Name="MaxValue"/>
-                <CheckBox Content="Minimum possible value" Name="MinValue"/>
+                <CheckBox Content="0" Name="ZeroValues" Margin="4" />
+                <CheckBox Content="+9.99" Name="P9_99" Margin="4" />
+                <CheckBox Content="-9.99" Name="N9_99" Margin="4" />
+                <CheckBox Content="Address = value" Name="AddressIsValue" Margin="4" />
+                <CheckBox Content="Maximum possible value" Name="MaxValue" Margin="4" />
+                <CheckBox Content="Minimum possible value" Name="MinValue" Margin="4" />
                 <!--Do I need overflow?-->
 
             </StackPanel>
 
-            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+            
 
+        </StackPanel>
+        <StackPanel Grid.Row="3">
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
 
-            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+            
 
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -139,22 +150,34 @@
 
         </StackPanel>
 
+        <StackPanel Grid.Row="4" >
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+        </StackPanel>
+        
         <!--Clients and settings-->
-        <StackPanel Grid.Column="1">
+        <StackPanel Grid.Column="1" >
             <TextBlock Text="PIM Clients" FontSize="20" HorizontalAlignment="Center"/>
-            <TextBlock Text="If these devices are virtual simulators, this requires more com0com ports" HorizontalAlignment="Center" />
-            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
-            <TextBlock Text="Number of clients" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+            <TextBlock HorizontalAlignment="Center" >
+                If these devices are virtual simulators, this requires
+                <Hyperlink NavigateUri="C:\Program Files (x86)\com0com\setupg.exe" RequestNavigate="Hyperlink_RequestNavigate">com0com</Hyperlink> 
+                ports to be set up.
+            </TextBlock>
+            <TextBlock Margin="16,0,16,0" MaxWidth="500" HorizontalAlignment="Center" TextAlignment="Center" Text="Connecting PIM clients after the process has started will cause the entire program to crash, and will require it to be restarted." TextWrapping="Wrap"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="1">
 
+            <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <RadioButton Name="OneClient" Margin="0,0,20,0" Checked="OneClient_Checked">One client</RadioButton>
                 <RadioButton Name="TwoClients" Margin="0,0,20,0" Checked="TwoClients_Checked">Two clients</RadioButton>
                 <RadioButton Name="ThreeClients" Margin="0,0,20,0" Checked="ThreeClients_Checked">Three clients</RadioButton>
             </StackPanel>
 
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="2" >
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
-            <TabControl Name="clientTabs" Visibility="Collapsed">
+            <TabControl Name="clientTabs" Visibility="Collapsed" Width="480">
                 <!--Client 1-->
                 <TabItem Header="Client 1" Name="Client1" Visibility="Collapsed" >
                     <Grid >
@@ -355,10 +378,14 @@
 
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
-            <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57"/>
         </StackPanel>
-        
+
+        <StackPanel Grid.Row="4" Grid.Column="1" >
+            <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+            <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
+        </StackPanel>
     </Grid>
 </Window>

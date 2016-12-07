@@ -91,14 +91,7 @@ namespace MMS
             Client1Port.Open();
             HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
             HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
-            try
-            {
-                new Thread(HostedSlave1.Listen).Start();
-            }
-            catch (Exception) 
-            {
-                // Put an error catching thing here
-            }
+            new Thread(HostedSlave1.Listen).Start();
         }
 
         /// <summary>
@@ -118,14 +111,7 @@ namespace MMS
             Client2Port.Open();
             HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
             HostedSlave2.DataStore = HostedSlave1.DataStore;
-            try
-            {
-                new Thread(HostedSlave2.Listen).Start();
-            }
-            catch (Exception)
-            {
-                // Put an error catching thing here
-            }
+            new Thread(HostedSlave2.Listen).Start();
         }
 
         /// <summary>
@@ -146,14 +132,7 @@ namespace MMS
             Client3Port.Open();
             HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
             HostedSlave3.DataStore = HostedSlave1.DataStore;
-            try
-            {
-                HostedSlave3.Listen();
-            }
-            catch (Exception)
-            {
-                // Put an error catching thing here
-            }
+            new Thread(HostedSlave3.Listen).Start();
         }
 
         /// <summary>
@@ -179,7 +158,7 @@ namespace MMS
             {
                 Thread.CurrentThread.Abort();
             }
-            
+
         }
 
         /// <summary>
