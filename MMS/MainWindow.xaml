@@ -22,7 +22,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid >
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
@@ -40,7 +40,7 @@
             <TextBlock Text="Data input source" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock Text="Data input can be live from the IED or generated" HorizontalAlignment="Center" />
         </StackPanel>
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1" Name="InputSettingsRow1">
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Name="InputRadioButtons" Margin="0,0,0,8">
                 <RadioButton Name="LiveInput" Checked="LiveInput_Checked" Margin="0,0,20,0">Live IED input</RadioButton>
@@ -48,7 +48,7 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="2" Name="InputSettingsRow2">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
             <!--LiveInputSettings-->
@@ -132,7 +132,7 @@
 
         </StackPanel>
         
-        <StackPanel Grid.Row="3">
+        <StackPanel Grid.Row="3" Name="RefreshSettings">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
 
@@ -160,7 +160,7 @@
             </TextBlock>
             <TextBlock Margin="16,0,16,0" MaxWidth="500" HorizontalAlignment="Center" TextAlignment="Center" Text="Connecting PIM clients after the process has started will cause the entire program to crash, and will require it to be restarted." TextWrapping="Wrap"/>
         </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="1">
+        <StackPanel Grid.Column="1" Grid.Row="1" Name="ClientSettingsRow1">
 
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -170,7 +170,7 @@
             </StackPanel>
 
         </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="2" >
+        <StackPanel Grid.Column="1" Grid.Row="2" Name="ClientSettingsRow2">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
 
             <TabControl Name="clientTabs" Visibility="Collapsed" Width="480">
@@ -374,7 +374,7 @@
 
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" >
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
         </StackPanel>

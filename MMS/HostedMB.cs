@@ -283,6 +283,8 @@ namespace MMS
             }
 
             string stringResult = new string(result);
+
+            // Changes the binary value to a negative number (according to IEEE 754)
             if (negative)
             {
                 stringResult = '1' + stringResult.Substring(1);

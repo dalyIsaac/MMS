@@ -292,6 +292,7 @@ namespace MMS
         {
             if ((string)Start.Content == "Start")
             {
+                EnableDisableSettings();
                 #region Client 1 settings
                 HostedMB.Client1Port = new SerialPort()
                 {
@@ -436,11 +437,22 @@ namespace MMS
             }
             else
             {
+                EnableDisableSettings();
                 KillThreads();
                 GenContinue = false;
                 Start.Content = "Start";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
             }
+        }
+
+        private void EnableDisableSettings()
+        {
+            InputSettingsRow1.IsEnabled = !InputSettingsRow1.IsEnabled;
+            InputSettingsRow2.IsEnabled = !InputSettingsRow2.IsEnabled;
+            RefreshSettings.IsEnabled = !RefreshSettings.IsEnabled;
+            ClientSettingsRow1.IsEnabled = !ClientSettingsRow1.IsEnabled;
+            ClientSettingsRow2.IsEnabled = !ClientSettingsRow2.IsEnabled;
+            PIMConnected.IsEnabled = !PIMConnected.IsEnabled;
         }
 
         /// <summary>
