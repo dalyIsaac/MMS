@@ -228,17 +228,18 @@ namespace MMS
         {
             if ((bool)RefreshBool.IsChecked)
             {
+                foreach (var item in GeneratedItemsCheckbox)
+                {
+                    item.IsEnabled = true;
+                }
                 RefreshStackPanel.Visibility = Visibility.Visible;
             }
             else
             {
                 RefreshStackPanel.Visibility = Visibility.Collapsed;
-                if (!(bool)RefreshBool.IsChecked)
+                foreach (var item in GeneratedItemsCheckbox)
                 {
-                    foreach (var item in GeneratedItemsCheckbox)
-                    {
-                        item.IsChecked = false;
-                    }
+                    item.IsChecked = false;
                 }
             }
         }
@@ -265,6 +266,7 @@ namespace MMS
                     }
                 }
             }
+            SerialChoose_SelectionChanged();
         }
 
         /// <summary>
@@ -281,6 +283,7 @@ namespace MMS
                     item.IsEnabled = true;
                 }
             }
+            SerialChoose_SelectionChanged();
         }
 
         /// <summary>
@@ -540,7 +543,7 @@ namespace MMS
             }
         }
 
-                public static bool GenContinue = true;
+        public static bool GenContinue = true;
 
         /// <summary>
         /// Kills all the threads and the program
