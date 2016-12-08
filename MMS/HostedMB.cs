@@ -138,7 +138,7 @@ namespace MMS
                         Thread.Sleep(RefreshFreq);
                     }
                 }
-                status = MainWindow.AppStatus;
+                status = MainWindow.GenContinue;
             }
         }
 
@@ -260,6 +260,12 @@ namespace MMS
         /// <returns></returns>
         private static ushort[] FloatToBinary(float value)
         {
+            bool negative = false;
+            if (value < 0)
+            {
+                negative = true;
+            }
+
             int bitCount = sizeof(float) * 8; // never rely on your knowledge of the size
             char[] result = new char[bitCount]; // better not use string, to avoid ineffective string concatenation repeated in a loop
 
@@ -277,6 +283,10 @@ namespace MMS
             }
 
             string stringResult = new string(result);
+            if (negative)
+            {
+                stringResult = '1' + stringResult.Substring(1);
+            }
 
             string firstHalf = stringResult.Substring(0, (stringResult.Length / 2));
             string secondHalf = stringResult.Substring((stringResult.Length / 2), (stringResult.Length / 2));

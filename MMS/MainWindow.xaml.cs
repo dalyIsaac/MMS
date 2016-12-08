@@ -422,7 +422,7 @@ namespace MMS
                 else
                 {
                     List<string> GenItemsString = new List<string>();
-
+                    GenContinue = true;
                     foreach (var item in GeneratedItemsCheckbox)
                     {
                         if ((bool)item.IsChecked)
@@ -437,6 +437,7 @@ namespace MMS
             else
             {
                 KillThreads();
+                GenContinue = false;
                 Start.Content = "Start";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
             }
@@ -527,7 +528,7 @@ namespace MMS
             }
         }
 
-                public static bool AppStatus = true;
+                public static bool GenContinue = true;
 
         /// <summary>
         /// Kills all the threads and the program
@@ -537,7 +538,7 @@ namespace MMS
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             KillThreads();
-            AppStatus = false;
+            GenContinue = false;
             Application.Current.Shutdown();
         }
         /// <summary>
