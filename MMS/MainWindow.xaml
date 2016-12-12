@@ -63,6 +63,7 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
+                <!--IED COM port-->
                 <StackPanel HorizontalAlignment="Center">
                     <TextBlock Text="IED COM port" Margin="8,24,4,4" HorizontalAlignment="Center"/>
                     <ListBox Name="SerialChooseIED" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
@@ -75,14 +76,20 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Margin="0,24,0,0" HorizontalAlignment="Center">
+                    
+                    <!--Baud rate-->
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
                         <TextBox Name="BaudRate" Text="38400" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                     </StackPanel>
+                    
+                    <!--Data bits-->
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
                         <TextBox Name="DataBits" Text="8" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                     </StackPanel>
+                    
+                    <!--Parity-->
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
                         <ComboBox Name="ParityComboBox" SelectedIndex="0">
@@ -97,6 +104,8 @@
                             </ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
+                    
+                    <!--Stop bits-->
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
                         <ComboBox Name="StopBitsComboBox" SelectedIndex="0">
@@ -108,11 +117,15 @@
                             </ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
+                    
+                    <!--Timeout-->
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
                         <TextBox Name="Timeout" Text="400" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                     </StackPanel>
                 </StackPanel>
+                
+                <!--WarningIED-->
                 <StackPanel Grid.ColumnSpan="2" Visibility="Collapsed" Name="WarningIED" Grid.Row="1" >
                     <TextBlock Text="Warning - the IED must use a different COM port" Foreground="Red" HorizontalAlignment="Center" />
                 </StackPanel>
@@ -133,6 +146,7 @@
 
         </StackPanel>
         
+        <!--RefreshSettings-->
         <StackPanel Grid.Row="3" Name="RefreshSettings">
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
@@ -149,7 +163,7 @@
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
         </StackPanel>
         
-        <!--Clients and settings-->
+        <!--com0com settings or link-->
         <StackPanel Grid.Column="1" >
             <TextBlock Text="PIM Clients" FontSize="20" HorizontalAlignment="Center"/>
             <TextBlock HorizontalAlignment="Center" >
@@ -161,6 +175,7 @@
         </StackPanel>
         <StackPanel Grid.Column="1" Grid.Row="1" Name="ClientSettingsRow1">
 
+            <!--Number of clients-->
             <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <RadioButton Name="OneClient" Margin="0,0,20,0" Checked="OneClient_Checked">One client</RadioButton>
@@ -185,6 +200,7 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
+                        <!--COM port-->
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
                             <ListBox Name="Client1Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged" >
@@ -197,14 +213,20 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            
+                            <!--Baud rate-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client1BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Data bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client1DataBits" Text="8" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Parity-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client1ParityComboBox" SelectedIndex="0">
@@ -219,6 +241,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Stop bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client1StopBitsComboBox" SelectedIndex="0">
@@ -230,6 +254,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Timeout-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client1Timeout" Text="400" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
@@ -250,6 +276,7 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
+                        <!--COM port-->
                         <StackPanel HorizontalAlignment="Center">
                             <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
                             <ListBox Name="Client2Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
@@ -262,14 +289,20 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+
+                            <!--Baud rate-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client2BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Data bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client2DataBits" Text="8" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Parity-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client2ParityComboBox" SelectedIndex="0">
@@ -284,6 +317,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Stop bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client2StopBitsComboBox" SelectedIndex="0">
@@ -295,6 +330,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Timeout-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client2Timeout" Text="400" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
@@ -316,6 +353,8 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel HorizontalAlignment="Center">
+                            
+                            <!--COM port-->
                             <TextBlock Text="Slave input COM port" Margin="8,4,4,4" HorizontalAlignment="Center"/>
                             <ListBox Name="Client3Serial" SelectionMode="Single" BorderBrush="White" SelectionChanged="SerialChoose_SelectionChanged">
                                 <ListBox.ItemTemplate>
@@ -327,14 +366,20 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            
+                            <!--Baud rate-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client3BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Data bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client3DataBits" Text="8" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
                             </StackPanel>
+                            
+                            <!--Parity-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client3ParityComboBox" SelectedIndex="0">
@@ -349,6 +394,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Stop bits-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Stop Bits:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <ComboBox Name="Client3StopBitsComboBox" SelectedIndex="0">
@@ -360,6 +407,8 @@
                                     </ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
+                            
+                            <!--Timeout-->
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
                                 <TextBox Name="Client3Timeout" Text="400" MaxWidth="60" TextChanged="TextBox_TextChanged"/>
@@ -373,16 +422,19 @@
 
         </StackPanel>
 
+        <!--PIM connected-->
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" >
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
         </StackPanel>
 
+        <!--Start button-->
         <StackPanel Grid.Row="4" Grid.Column="1" >
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
         </StackPanel>
 
+        <!--WarningTextBlock-->
         <TextBlock Grid.ColumnSpan="2" Grid.Row="5" Text="Warning - only positive integer values are allowed" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningTextBlock" />
         
     </Grid>

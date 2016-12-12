@@ -28,13 +28,16 @@ namespace MMS
         /// </summary>
         public List<string> serialPorts;
 
+        /// <summary>
+        /// Window constructor
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-            GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue };
-            serialPorts = SerialPort.GetPortNames().ToList();
+            GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue }; // Loads the GeneratedItems checkboxes into a list
+            serialPorts = SerialPort.GetPortNames().ToList(); 
             List<string> itemsToDelete = new List<string>();
-            foreach (var item in serialPorts)
+            foreach (var item in serialPorts) // Deletes ports which cannot be used by the application
             {
                 SerialPort port = new SerialPort(item);
                 try
@@ -448,6 +451,9 @@ namespace MMS
             }
         }
 
+        /// <summary>
+        /// Disables the settings if the MMS is running - enables them if it is not
+        /// </summary>
         private void EnableDisableSettings()
         {
             InputSettingsRow1.IsEnabled = !InputSettingsRow1.IsEnabled;
@@ -543,6 +549,9 @@ namespace MMS
             }
         }
 
+        /// <summary>
+        /// True: Continue. False: Stop current process
+        /// </summary>
         public static bool GenContinue = true;
 
         /// <summary>
