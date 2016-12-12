@@ -35,7 +35,15 @@ namespace MMS
         {
             InitializeComponent();
             GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue }; // Loads the GeneratedItems checkboxes into a list
-            serialPorts = SerialPort.GetPortNames().ToList(); 
+            CheckSerial();
+        }
+
+        /// <summary>
+        /// Checks which serial ports can be open
+        /// </summary>
+        private void CheckSerial()
+        {
+            serialPorts = SerialPort.GetPortNames().ToList();
             List<string> itemsToDelete = new List<string>();
             foreach (var item in serialPorts) // Deletes ports which cannot be used by the application
             {
@@ -289,6 +297,21 @@ namespace MMS
             SerialChoose_SelectionChanged();
         }
 
+        private bool TestSerialPort(string name)
+        {
+            SerialPort port = new SerialPort(name);
+            try
+            {
+                port.Open();
+                port.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Starts or kills the test
         /// </summary>
@@ -300,146 +323,165 @@ namespace MMS
             {
                 EnableDisableSettings();
                 #region Client 1 settings
-                HostedMB.Client1Port = new SerialPort()
-                {
-                    PortName = (string)Client1Serial.SelectedValue,
-                    BaudRate = Convert.ToInt32(Client1BaudRate.Text),
-                    DataBits = Convert.ToInt32(Client1DataBits.Text)
-                };
-                switch (Client1ParityComboBox.Text)
-                {
-                    case "None":
-                        HostedMB.Client1Port.Parity = Parity.None;
-                        break;
-                    case "Odd":
-                        HostedMB.Client1Port.Parity = Parity.Odd;
-                        break;
-                    case "Even":
-                        HostedMB.Client1Port.Parity = Parity.Even;
-                        break;
-                }
-                switch (Client1StopBitsComboBox.Text)
-                {
-                    case "1":
-                        HostedMB.Client1Port.StopBits = StopBits.One;
-                        break;
-                    case "2":
-                        HostedMB.Client1Port.StopBits = StopBits.Two;
-                        break;
-                }
-                #endregion
 
-                // Specifies the creation of slaves for clients
-                // All the slaves are created on the same thread
-                if ((bool)OneClient.IsChecked)
+                // Checks if the COM port selected is being used
+                if (!TestSerialPort((string)Client1Serial.SelectedValue))
                 {
-                    new Thread(HostedMB.CreateHostedSlave1).Start();
-                }
-                else if ((bool)TwoClients.IsChecked)
-                {
-                    Client2Settings();
-                    new Thread(HostedMB.CreateHostedSlave1And2).Start();
+                    string text = $"{(string)Client1Serial.SelectedValue} is currently in use. Please select another COM port";
+                    string caption = "COM port not available";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
+                    MessageBox.Show(text, caption, button, icon);
+                    CheckSerial();
+                    EnableDisableSettings();
+                    SerialChooseIED.ItemsSource = serialPorts;
+                    Client1Serial.ItemsSource = serialPorts;
+                    Client2Serial.ItemsSource = serialPorts;
+                    Client3Serial.ItemsSource = serialPorts;
                 }
                 else
                 {
-                    Client2Settings();
-                    #region Client 3 settings
-                    HostedMB.Client3Port = new SerialPort()
+                    HostedMB.Client1Port = new SerialPort()
                     {
-                        PortName = (string)Client3Serial.SelectedValue,
-                        BaudRate = Convert.ToInt32(Client3BaudRate.Text),
-                        DataBits = Convert.ToInt32(Client3DataBits.Text)
+                        PortName = (string)Client1Serial.SelectedValue,
+                        BaudRate = Convert.ToInt32(Client1BaudRate.Text),
+                        DataBits = Convert.ToInt32(Client1DataBits.Text)
                     };
-                    switch (Client3ParityComboBox.Text)
+                    switch (Client1ParityComboBox.Text)
                     {
                         case "None":
-                            HostedMB.Client3Port.Parity = Parity.None;
+                            HostedMB.Client1Port.Parity = Parity.None;
                             break;
                         case "Odd":
-                            HostedMB.Client3Port.Parity = Parity.Odd;
+                            HostedMB.Client1Port.Parity = Parity.Odd;
                             break;
                         case "Even":
-                            HostedMB.Client3Port.Parity = Parity.Even;
+                            HostedMB.Client1Port.Parity = Parity.Even;
                             break;
                     }
-                    switch (Client3StopBitsComboBox.Text)
+                    switch (Client1StopBitsComboBox.Text)
                     {
                         case "1":
-                            HostedMB.Client3Port.StopBits = StopBits.One;
+                            HostedMB.Client1Port.StopBits = StopBits.One;
                             break;
                         case "2":
-                            HostedMB.Client3Port.StopBits = StopBits.Two;
+                            HostedMB.Client1Port.StopBits = StopBits.Two;
                             break;
                     }
                     #endregion
-                    new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
-                }
 
-                // Ensures that data input does not begin before the data store is created
-                while (!HostedMB.CreateHostedSlave1Status)
-                {
-
-                }
-
-                HostedMB.RefreshData = (bool)RefreshBool.IsChecked;
-                if (HostedMB.RefreshData)
-                {
-                    HostedMB.RefreshFreq = Convert.ToInt32(RefreshRate.Text);
-                }
-
-                Start.Content = "Stop";
-                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
-
-                #region Live vs. Generated
-                if ((bool)LiveInput.IsChecked)
-                {
-                    #region Hosted Master Port settings
-                    HostedMB.HostedMasterPort = new SerialPort()
+                    // Specifies the creation of slaves for clients
+                    // All the slaves are created on the same thread
+                    if ((bool)OneClient.IsChecked)
                     {
-                        PortName = (string)SerialChooseIED.SelectedItem,
-                        BaudRate = Convert.ToInt32(BaudRate.Text),
-                        DataBits = Convert.ToInt32(DataBits.Text),
-                    };
-                    switch (ParityComboBox.Text)
-                    {
-                        case "None":
-                            HostedMB.HostedMasterPort.Parity = Parity.None;
-                            break;
-                        case "Odd":
-                            HostedMB.HostedMasterPort.Parity = Parity.Odd;
-                            break;
-                        case "Even":
-                            HostedMB.HostedMasterPort.Parity = Parity.Even;
-                            break;
+                        new Thread(HostedMB.CreateHostedSlave1).Start();
                     }
-                    switch (StopBitsComboBox.Text)
+                    else if ((bool)TwoClients.IsChecked)
                     {
-                        case "1":
-                            HostedMB.HostedMasterPort.StopBits = StopBits.One;
-                            break;
-                        case "2":
-                            HostedMB.HostedMasterPort.StopBits = StopBits.Two;
-                            break;
+                        Client2Settings();
+                        new Thread(HostedMB.CreateHostedSlave1And2).Start();
                     }
-                    #endregion
-                    HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
-
-                    new Thread(HostedMB.Live).Start(); // Starts static class in new thread
-                }
-                else
-                {
-                    List<string> GenItemsString = new List<string>();
-                    GenContinue = true;
-                    foreach (var item in GeneratedItemsCheckbox)
+                    else
                     {
-                        if ((bool)item.IsChecked)
+                        Client2Settings();
+                        #region Client 3 settings
+                        HostedMB.Client3Port = new SerialPort()
                         {
-                            GenItemsString.Add(item.Name);
+                            PortName = (string)Client3Serial.SelectedValue,
+                            BaudRate = Convert.ToInt32(Client3BaudRate.Text),
+                            DataBits = Convert.ToInt32(Client3DataBits.Text)
+                        };
+                        switch (Client3ParityComboBox.Text)
+                        {
+                            case "None":
+                                HostedMB.Client3Port.Parity = Parity.None;
+                                break;
+                            case "Odd":
+                                HostedMB.Client3Port.Parity = Parity.Odd;
+                                break;
+                            case "Even":
+                                HostedMB.Client3Port.Parity = Parity.Even;
+                                break;
                         }
+                        switch (Client3StopBitsComboBox.Text)
+                        {
+                            case "1":
+                                HostedMB.Client3Port.StopBits = StopBits.One;
+                                break;
+                            case "2":
+                                HostedMB.Client3Port.StopBits = StopBits.Two;
+                                break;
+                        }
+                        #endregion
+                        new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
                     }
-                    new Thread(() => HostedMB.Generated(GenItemsString)).Start();
+
+                    // Ensures that data input does not begin before the data store is created
+                    while (!HostedMB.CreateHostedSlave1Status)
+                    {
+
+                    }
+
+                    HostedMB.RefreshData = (bool)RefreshBool.IsChecked;
+                    if (HostedMB.RefreshData)
+                    {
+                        HostedMB.RefreshFreq = Convert.ToInt32(RefreshRate.Text);
+                    }
+
+                    Start.Content = "Stop";
+                    Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
+
+                    #region Live vs. Generated
+                    if ((bool)LiveInput.IsChecked)
+                    {
+                        #region Hosted Master Port settings
+                        HostedMB.HostedMasterPort = new SerialPort()
+                        {
+                            PortName = (string)SerialChooseIED.SelectedItem,
+                            BaudRate = Convert.ToInt32(BaudRate.Text),
+                            DataBits = Convert.ToInt32(DataBits.Text),
+                        };
+                        switch (ParityComboBox.Text)
+                        {
+                            case "None":
+                                HostedMB.HostedMasterPort.Parity = Parity.None;
+                                break;
+                            case "Odd":
+                                HostedMB.HostedMasterPort.Parity = Parity.Odd;
+                                break;
+                            case "Even":
+                                HostedMB.HostedMasterPort.Parity = Parity.Even;
+                                break;
+                        }
+                        switch (StopBitsComboBox.Text)
+                        {
+                            case "1":
+                                HostedMB.HostedMasterPort.StopBits = StopBits.One;
+                                break;
+                            case "2":
+                                HostedMB.HostedMasterPort.StopBits = StopBits.Two;
+                                break;
+                        }
+                        #endregion
+                        HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+
+                        new Thread(HostedMB.Live).Start(); // Starts static class in new thread
+                    }
+                    else
+                    {
+                        List<string> GenItemsString = new List<string>();
+                        GenContinue = true;
+                        foreach (var item in GeneratedItemsCheckbox)
+                        {
+                            if ((bool)item.IsChecked)
+                            {
+                                GenItemsString.Add(item.Name);
+                            }
+                        }
+                        new Thread(() => HostedMB.Generated(GenItemsString)).Start();
+                    }
+                    #endregion
                 }
-                #endregion
             }
             else
             {
