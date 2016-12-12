@@ -308,6 +308,17 @@ namespace MMS
             }
             catch (Exception)
             {
+                string text = $"{name} is currently in use. Please select another COM port";
+                string caption = "COM port not available";
+                MessageBoxButton button = MessageBoxButton.OK;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBox.Show(text, caption, button, icon);
+                CheckSerial();
+                EnableDisableSettings();
+                SerialChooseIED.ItemsSource = serialPorts;
+                Client1Serial.ItemsSource = serialPorts;
+                Client2Serial.ItemsSource = serialPorts;
+                Client3Serial.ItemsSource = serialPorts;
                 return false;
             }
         }
@@ -327,17 +338,6 @@ namespace MMS
                 // Checks if the COM port selected is being used
                 if (!TestSerialPort((string)Client1Serial.SelectedValue))
                 {
-                    string text = $"{(string)Client1Serial.SelectedValue} is currently in use. Please select another COM port";
-                    string caption = "COM port not available";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
-                    MessageBox.Show(text, caption, button, icon);
-                    CheckSerial();
-                    EnableDisableSettings();
-                    SerialChooseIED.ItemsSource = serialPorts;
-                    Client1Serial.ItemsSource = serialPorts;
-                    Client2Serial.ItemsSource = serialPorts;
-                    Client3Serial.ItemsSource = serialPorts;
                 }
                 else
                 {
@@ -378,12 +378,24 @@ namespace MMS
                     }
                     else if ((bool)TwoClients.IsChecked)
                     {
+                        if (!TestSerialPort((string)Client2Serial.SelectedValue))
+                        {
+                            return;
+                        }
                         Client2Settings();
                         new Thread(HostedMB.CreateHostedSlave1And2).Start();
                     }
                     else
                     {
+                        if (!TestSerialPort((string)Client2Serial.SelectedValue))
+                        {
+                            return;
+                        }
                         Client2Settings();
+                        if (!TestSerialPort((string)Client3Serial.SelectedValue))
+                        {
+                            return;
+                        }
                         #region Client 3 settings
                         HostedMB.Client3Port = new SerialPort()
                         {
@@ -434,6 +446,10 @@ namespace MMS
                     #region Live vs. Generated
                     if ((bool)LiveInput.IsChecked)
                     {
+                        if (!TestSerialPort((string)SerialChooseIED.SelectedValue))
+                        {
+                            return;
+                        }
                         #region Hosted Master Port settings
                         HostedMB.HostedMasterPort = new SerialPort()
                         {
