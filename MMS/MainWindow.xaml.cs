@@ -520,7 +520,7 @@ namespace MMS
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TextBlock_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
             {
