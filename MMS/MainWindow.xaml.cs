@@ -113,7 +113,7 @@ namespace MMS
             }
 
             // Checks that there are no errors, and whether or not a connection can be initiated
-            if (WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed)
+            if (WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed && WarningTextBlock.Visibility == Visibility.Collapsed)
             {
                 if ((bool)PIMConnected.IsChecked)
                 {
@@ -297,6 +297,11 @@ namespace MMS
             SerialChoose_SelectionChanged();
         }
 
+        /// <summary>
+        /// Notifies the user that the currently selected COM port is not available
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         private bool TestSerialPort(string name)
         {
             SerialPort port = new SerialPort(name);
@@ -605,6 +610,14 @@ namespace MMS
                     WarningTextBlock.Visibility = Visibility.Visible;
                 }
             }
+            try
+            {
+                SerialChoose_SelectionChanged();
+            }
+            catch (Exception)
+            {
+            }
+            
         }
 
         /// <summary>
