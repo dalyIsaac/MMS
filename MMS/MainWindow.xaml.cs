@@ -520,25 +520,25 @@ namespace MMS
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RefreshRate_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBlock_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
             {
-                int test = Convert.ToInt32(RefreshRate.Text);
+                int test = Convert.ToInt32(((TextBox)sender).Text);
                 if (test <= 0)
                 {
-                    WarningRefreshRate.Visibility = Visibility.Visible;
+                    WarningTextBlock.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    WarningRefreshRate.Visibility = Visibility.Collapsed;
+                    WarningTextBlock.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception)
             {
-                if (WarningRefreshRate != null)
+                if (WarningTextBlock != null)
                 {
-                    WarningRefreshRate.Visibility = Visibility.Visible;
+                    WarningTextBlock.Visibility = Visibility.Visible;
                 }
             }
         }

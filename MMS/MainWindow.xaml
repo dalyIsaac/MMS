@@ -33,6 +33,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <!--Data input-->
@@ -76,11 +77,11 @@
                 <StackPanel Grid.Column="2" Margin="0,24,0,0" HorizontalAlignment="Center">
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
-                        <TextBox Name="BaudRate" Text="38400" MaxWidth="60"/>
+                        <TextBox Name="BaudRate" Text="38400" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                     </StackPanel>
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
-                        <TextBox Name="DataBits" Text="8" MaxWidth="60"/>
+                        <TextBox Name="DataBits" Text="8" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                     </StackPanel>
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
@@ -109,7 +110,7 @@
                     </StackPanel>
                     <StackPanel Style="{StaticResource OptionsStackPanel}">
                         <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
-                        <TextBox Name="Timeout" Text="400" MaxWidth="60"/>
+                        <TextBox Name="Timeout" Text="400" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.ColumnSpan="2" Visibility="Collapsed" Name="WarningIED" Grid.Row="1" >
@@ -136,13 +137,11 @@
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Checked" HorizontalAlignment="Center"/>
 
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Name="RefreshStackPanel" Visibility="Collapsed">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Name="RefreshStackPanel" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
-                    <TextBox Text="400" Name="RefreshRate" TextChanged="RefreshRate_TextChanged"/>
+                    <TextBox Text="400" Name="RefreshRate" TextChanged="TextBlock_TextChanged"/>
                 </StackPanel>
-                <TextBlock Text="Warning - the refresh rate must be a positive integer value" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningRefreshRate" />
-            </StackPanel>
+                
 
         </StackPanel>
 
@@ -200,11 +199,11 @@
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client1BaudRate" Text="38400" MaxWidth="60"/>
+                                <TextBox Name="Client1BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client1DataBits" Text="8" MaxWidth="60"/>
+                                <TextBox Name="Client1DataBits" Text="8" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
@@ -233,7 +232,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client1Timeout" Text="400" MaxWidth="60"/>
+                                <TextBox Name="Client1Timeout" Text="400" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                         </StackPanel>
                         
@@ -265,11 +264,11 @@
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client2BaudRate" Text="38400" MaxWidth="60"/>
+                                <TextBox Name="Client2BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client2DataBits" Text="8" MaxWidth="60"/>
+                                <TextBox Name="Client2DataBits" Text="8" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
@@ -298,7 +297,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client2Timeout" Text="400" MaxWidth="60"/>
+                                <TextBox Name="Client2Timeout" Text="400" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -330,11 +329,11 @@
                         <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Baud Rate:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client3BaudRate" Text="38400" MaxWidth="60"/>
+                                <TextBox Name="Client3BaudRate" Text="19200" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Data bits:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client3DataBits" Text="8" MaxWidth="60"/>
+                                <TextBox Name="Client3DataBits" Text="8" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Parity:" Style="{StaticResource DescriptionTextBlock}"/>
@@ -363,7 +362,7 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource OptionsStackPanel}">
                                 <TextBlock Text="Timeout:" Style="{StaticResource DescriptionTextBlock}"/>
-                                <TextBox Name="Client3Timeout" Text="400" MaxWidth="60"/>
+                                <TextBox Name="Client3Timeout" Text="400" MaxWidth="60" TextChanged="TextBlock_TextChanged"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -383,5 +382,8 @@
             <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
             <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
         </StackPanel>
+
+        <TextBlock Grid.ColumnSpan="2" Grid.Row="5" Text="Warning - only positive integer values are allowed" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningTextBlock" />
+        
     </Grid>
 </Window>

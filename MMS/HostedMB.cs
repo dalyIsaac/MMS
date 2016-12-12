@@ -83,6 +83,10 @@ namespace MMS
             }
         }
 
+        /// <summary>
+        /// Generated values to be written to the DataStore
+        /// </summary>
+        /// <param name="input"></param>
         public static void Generated(List<string> input)
         {
             bool status = true;
@@ -143,7 +147,7 @@ namespace MMS
         }
 
         /// <summary>
-        /// Writes the generated values into the slave data store
+        /// Writes values to the DataStore
         /// </summary>
         private static void WriteValues(ushort[] items, int i)
         {
@@ -231,7 +235,6 @@ namespace MMS
             {
                 Thread.CurrentThread.Abort();
             }
-
         }
 
         /// <summary>
