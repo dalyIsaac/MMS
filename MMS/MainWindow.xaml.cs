@@ -3,18 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MMS
 {
@@ -163,6 +156,7 @@ namespace MMS
         /// <param name="e"></param>
         private void LiveInput_Checked(object sender, RoutedEventArgs e)
         {
+            SerialChoose_SelectionChanged();
             GenInputSettings.Visibility = Visibility.Collapsed;
             LiveInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.ItemsSource = serialPorts;
@@ -175,6 +169,7 @@ namespace MMS
         /// <param name="e"></param>
         private void GenInput_Checked(object sender, RoutedEventArgs e)
         {
+            SerialChoose_SelectionChanged();
             LiveInputSettings.Visibility = Visibility.Collapsed;
             GenInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.SelectedItem = null;
@@ -188,7 +183,10 @@ namespace MMS
         private void OneClient_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
+            clientTabs.SelectedIndex = 0;
             Client1Serial.ItemsSource = serialPorts;
+            Client2Serial.SelectedItem = null;
+            Client3Serial.SelectedItem = null;
             Client1.Visibility = Visibility.Visible;
             Client2.Visibility = Visibility.Collapsed;
             Client3.Visibility = Visibility.Collapsed;
@@ -202,8 +200,10 @@ namespace MMS
         private void TwoClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
+            clientTabs.SelectedIndex = 1;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
+            Client3Serial.SelectedItem = null;
             Client1.Visibility = Visibility.Visible;
             Client2.Visibility = Visibility.Visible;
             Client3.Visibility = Visibility.Collapsed;
@@ -217,6 +217,7 @@ namespace MMS
         private void ThreeClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
+            clientTabs.SelectedIndex = 2;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
             Client1.Visibility = Visibility.Visible;
@@ -237,23 +238,40 @@ namespace MMS
         /// <param name="e"></param>
         private void RefreshBool_Checked(object sender, RoutedEventArgs e)
         {
-            if ((bool)RefreshBool.IsChecked)
+            foreach (var item in GeneratedItemsCheckbox)
             {
-                foreach (var item in GeneratedItemsCheckbox)
-                {
-                    item.IsEnabled = true;
-                }
-                RefreshStackPanel.Visibility = Visibility.Visible;
+                item.IsEnabled = true;
             }
-            else
+            RefreshStackPanel.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Shows the user the refresh options
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RefreshBool_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RefreshStackPanel.Visibility = Visibility.Collapsed;
+            if (GeneratedItemsCheckbox.Count(x => (bool)x.IsChecked) != 1)
             {
-                RefreshStackPanel.Visibility = Visibility.Collapsed;
                 foreach (var item in GeneratedItemsCheckbox)
                 {
                     item.IsChecked = false;
                 }
             }
+            else
+            {
+                foreach (var item in GeneratedItemsCheckbox)
+                {
+                    if (!(bool)item.IsChecked)
+                    {
+                        item.IsEnabled = false;
+                    }
+                }
+            }
         }
+
 
         /// <summary>
         /// Ensures that only one checkbox can be checked if the input is not refreshing, for generated settings
@@ -617,7 +635,7 @@ namespace MMS
             catch (Exception)
             {
             }
-            
+
         }
 
         /// <summary>
