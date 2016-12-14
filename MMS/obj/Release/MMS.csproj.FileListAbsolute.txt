@@ -16,6 +16,5 @@ C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.exe
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.pdb
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\MMS.application
-C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.csprojResolveAssemblyReference.cache
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.application

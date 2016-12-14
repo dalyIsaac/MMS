@@ -537,15 +537,15 @@ namespace MMS
 
                 if ((bool)OneClient.IsChecked)
                 {
-                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests";
+                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests";
                 }
                 else if ((bool)TwoClients.IsChecked)
                 {
-                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests\nClient 2: {HostedMB.HostedSlave2RequestNum} requests";
+                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests\nClient 2 ({HostedMB.Client2Port.PortName}): {HostedMB.HostedSlave2RequestNum} requests";
                 }
                 else
                 {
-                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests\nClient 2: {HostedMB.HostedSlave2RequestNum} requests\nClient 3: {HostedMB.HostedSlave3RequestNum} requests";
+                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests\nClient 2 ({HostedMB.Client2Port.PortName}): {HostedMB.HostedSlave2RequestNum} requests\nClient 3 ({HostedMB.Client3Port.PortName}): {HostedMB.HostedSlave3RequestNum} requests";
                 }
                 caption = "Number of client requests received";
                 button = MessageBoxButton.OK;

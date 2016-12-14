@@ -1,7 +1,6 @@
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.exe.config
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.exe
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.pdb
-C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.csprojResolveAssemblyReference.cache
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MainWindow.g.cs
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\App.g.cs
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS_MarkupCompile.cache
