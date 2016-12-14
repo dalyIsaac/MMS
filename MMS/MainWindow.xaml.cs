@@ -451,6 +451,10 @@ namespace MMS
                         new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
                     }
 
+                    HostedMB.HostedSlave1RequestNum = 0;
+                    HostedMB.HostedSlave2RequestNum = 0;
+                    HostedMB.HostedSlave3RequestNum = 0;
+
                     // Ensures that data input does not begin before the data store is created
                     while (!HostedMB.CreateHostedSlave1Status)
                     {
@@ -526,6 +530,27 @@ namespace MMS
             {
                 EnableDisableSettings();
                 KillThreads();
+                string text;
+                string caption;
+                MessageBoxButton button;
+                MessageBoxImage icon;
+
+                if ((bool)OneClient.IsChecked)
+                {
+                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests";
+                }
+                else if ((bool)TwoClients.IsChecked)
+                {
+                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests\nClient 2: {HostedMB.HostedSlave2RequestNum} requests";
+                }
+                else
+                {
+                    text = $"Client 1: {HostedMB.HostedSlave1RequestNum} requests\nClient 2: {HostedMB.HostedSlave2RequestNum} requests\nClient 3: {HostedMB.HostedSlave3RequestNum} requests";
+                }
+                caption = "Number of client requests received";
+                button = MessageBoxButton.OK;
+                icon = MessageBoxImage.Information;
+                MessageBox.Show(text, caption, button, icon);
                 GenContinue = false;
                 Start.Content = "Start";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));

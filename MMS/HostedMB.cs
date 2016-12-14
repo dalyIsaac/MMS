@@ -168,8 +168,54 @@ namespace MMS
             Client1Port.Open();
             HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
             HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
+            HostedSlave1.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave1_Request_Event);
             CreateHostedSlave1Status = true;
             new Thread(HostedSlave1.Listen).Start();
+        }
+
+        /// <summary>
+        /// Stores the number of requests that HostedSlave1 has received
+        /// </summary>
+        public static ulong HostedSlave1RequestNum;
+
+        /// <summary>
+        /// Event for incrementing HostedSlave1RequestNum
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave1_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            HostedSlave1RequestNum++;
+        }
+
+        /// <summary>
+        /// Stores the number of requests that HostedSlave2 has received
+        /// </summary>
+        public static ulong HostedSlave2RequestNum;
+
+        /// <summary>
+        /// Event for incrementing HostedSlave2RequestNum
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave2_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            HostedSlave2RequestNum++;
+        }
+
+        /// <summary>
+        /// Stores the number of requests that HostedSlave3 has received
+        /// </summary>
+        public static ulong HostedSlave3RequestNum;
+
+        /// <summary>
+        /// Event for incrementing HostedSlave3RequestNum
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave3_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            HostedSlave3RequestNum++;
         }
 
         /// <summary>
@@ -189,6 +235,7 @@ namespace MMS
             Client2Port.Open();
             HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
             HostedSlave2.DataStore = HostedSlave1.DataStore;
+            HostedSlave2.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave2_Request_Event);
             new Thread(HostedSlave2.Listen).Start();
         }
 
@@ -210,6 +257,7 @@ namespace MMS
             Client3Port.Open();
             HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
             HostedSlave3.DataStore = HostedSlave1.DataStore;
+            HostedSlave3.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave3_Request_Event);
             new Thread(HostedSlave3.Listen).Start();
         }
 
