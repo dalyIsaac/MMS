@@ -28,6 +28,7 @@ namespace MMS
         {
             InitializeComponent();
             GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue }; // Loads the GeneratedItems checkboxes into a list
+            TextBoxArray = new TextBox[] { BaudRate, DataBits, Timeout, RefreshRate, Client1BaudRate, Client1DataBits, Client2BaudRate, Client2DataBits, Client3BaudRate, Client3DataBits, Hours, Minutes };
             CheckSerial();
         }
 
@@ -628,16 +629,85 @@ namespace MMS
         }
 
         /// <summary>
+        /// Contains all the textboxes in the program
+        /// </summary>
+        private TextBox[] TextBoxArray;
+
+        private bool TextBoxCheck(TextBox item)
+        {
+            try
+            {
+                if (item.Name == "Hours" || item.Name == "Minutes")
+                {
+                    TextBox[] testArray = new TextBox[] { Hours, Minutes };
+                    if (testArray[0].Text == "" && testArray[1].Text == "")
+                    {
+                        return true;
+                    }
+                    List<int> testArrayValues = new List<int>();
+                    foreach (var thing in testArray)
+                    {
+                        try
+                        {
+                            testArrayValues.Add(Convert.ToInt32(thing.Text));
+                        }
+                        catch (Exception)
+                        {
+                            testArrayValues.Add(-1);
+                        }
+                    }
+                    if (testArrayValues[0] <= 0 && testArrayValues[1] <= 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+
+                int test = Convert.ToInt32(item.Text);
+                if (test <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+
+            }
+            catch (Exception)
+            {
+                if (item.Text != "")
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+        /// <summary>
         /// Checks that the refresh rate is available
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
+            List<bool> StatusBool = new List<bool>(); // True means pass
+            if (TextBoxArray != null)
             {
-                int test = Convert.ToInt32(((TextBox)sender).Text);
-                if (test <= 0)
+                foreach (var item in TextBoxArray)
+                {
+                    StatusBool.Add(TextBoxCheck(item));
+                    try
+                    {
+                        SerialChoose_SelectionChanged();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                if (StatusBool.Contains(false))
                 {
                     WarningTextBlock.Visibility = Visibility.Visible;
                 }
@@ -646,21 +716,6 @@ namespace MMS
                     WarningTextBlock.Visibility = Visibility.Collapsed;
                 }
             }
-            catch (Exception)
-            {
-                if (WarningTextBlock != null)
-                {
-                    WarningTextBlock.Visibility = Visibility.Visible;
-                }
-            }
-            try
-            {
-                SerialChoose_SelectionChanged();
-            }
-            catch (Exception)
-            {
-            }
-
         }
 
         /// <summary>
@@ -695,6 +750,62 @@ namespace MMS
             {
                 Process.Start(new ProcessStartInfo("https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/powersdr-iq/setup_com0com_W7_x64_signed.exe"));
                 e.Handled = true;
+            }
+        }
+
+        private void SelectFileNameLocation_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// Shows LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LogBool_Checked(object sender, RoutedEventArgs e)
+        {
+            LoggerInfo.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Hides LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LogBool_Unchecked(object sender, RoutedEventArgs e)
+        {
+            LoggerInfo.Visibility = Visibility.Collapsed;
+        }
+
+
+        private void Time_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            List<bool> StatusBoolList = new List<bool>();
+            if (Hours != null && Minutes != null)
+            {
+                TextBox[] TextBoxArray = new TextBox[] { Hours, Minutes };
+
+                foreach (var item in TextBoxArray)
+                {
+                    if (item.Text == "")
+                    {
+                        StatusBoolList.Add(false);
+                    }
+                    else
+                    {
+                        StatusBoolList.Add(TextBoxCheck(item));
+                    }
+                }
+                if (StatusBoolList.Contains(false))
+                {
+                    SelectFileNameLocation.IsEnabled = false;
+                }
+                else
+                {
+                    SelectFileNameLocation.IsEnabled = true;
+                }
+                TextBox_TextChanged(sender, e);
             }
         }
     }

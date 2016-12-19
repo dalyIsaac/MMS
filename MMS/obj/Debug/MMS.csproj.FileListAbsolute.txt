@@ -18,3 +18,4 @@ C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.application
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.application
+C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.csprojResolveAssemblyReference.cache

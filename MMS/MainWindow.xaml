@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MMS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="1008" MinWidth="1008"
+        Title="MainWindow" Height="500" Width="1512" MinWidth="1512"
         Closing="Window_Closing"
         >
 
@@ -19,12 +19,27 @@
                 <Setter Property="Margin" Value="0,0,4,0" />
                 <Setter Property="Width" Value="70" />
             </Style>
+            <Style TargetType="Rectangle" x:Key="TitleLine" >
+                <Setter Property="Width" Value="500" />
+                <Setter Property="Height" Value="2" />
+                <Setter Property="Fill" Value="Gray" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="8" />
+            </Style>
+            <Style TargetType="Rectangle" x:Key="SeparatorLine" >
+                <Setter Property="Width" Value="400" />
+                <Setter Property="Height" Value="1" />
+                <Setter Property="Fill" Value="Gray" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="8" />
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
     <ScrollViewer>
         <Grid>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
@@ -51,7 +66,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="2" Name="InputSettingsRow2">
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
 
                 <!--LiveInputSettings-->
                 <Grid Name="LiveInputSettings" Visibility="Collapsed" HorizontalAlignment="Center">
@@ -127,7 +142,7 @@
                     </StackPanel>
 
                     <!--WarningIED-->
-                    <StackPanel Grid.ColumnSpan="2" Visibility="Collapsed" Name="WarningIED" Grid.Row="1" >
+                    <StackPanel Grid.ColumnSpan="3" Visibility="Collapsed" Name="WarningIED" Grid.Row="1" >
                         <TextBlock Text="Warning - the IED must use a different COM port" Foreground="Red" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>
@@ -149,7 +164,7 @@
 
             <!--RefreshSettings-->
             <StackPanel Grid.Row="3" Name="RefreshSettings">
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
                 <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Unchecked" HorizontalAlignment="Center"/>
 
                 <StackPanel Name="RefreshStackPanel" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -161,7 +176,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="4" >
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
             </StackPanel>
 
             <!--com0com settings or link-->
@@ -177,7 +192,7 @@
             <StackPanel Grid.Column="1" Grid.Row="1" Name="ClientSettingsRow1">
 
                 <!--Number of clients-->
-                <Rectangle Width="500" Height="2" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource TitleLine}"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <RadioButton Name="OneClient" Margin="0,0,20,0" Checked="OneClient_Checked">One client</RadioButton>
                     <RadioButton Name="TwoClients" Margin="0,0,20,0" Checked="TwoClients_Checked">Two clients</RadioButton>
@@ -186,7 +201,7 @@
 
             </StackPanel>
             <StackPanel Grid.Column="1" Grid.Row="2" Name="ClientSettingsRow2">
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
 
                 <TabControl Name="clientTabs" Visibility="Collapsed" Width="480">
                     <!--Client 1-->
@@ -409,18 +424,47 @@
 
             <!--PIM connected-->
             <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" >
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
                 <CheckBox Name="PIMConnected" Checked="PIMConnected_Checked" Unchecked="PIMConnected_Checked" Content="The PIMs are already connected and querying this device" Margin="4"/>
             </StackPanel>
 
             <!--Start button-->
             <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,8">
-                <Rectangle Width="400" Height="1" Fill="gray" HorizontalAlignment="Center" Margin="8"/>
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
                 <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
             </StackPanel>
 
             <!--WarningTextBlock-->
-            <TextBlock Grid.ColumnSpan="2" Grid.Row="5" Text="Warning - only positive integer values are allowed" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningTextBlock" />
+            <TextBlock Grid.ColumnSpan="3" Grid.Row="5" Text="Warning - only positive integer values are allowed" Foreground="Red" HorizontalAlignment="Center" Visibility="Collapsed" Name="WarningTextBlock" />
+
+            <!--Logger-->
+            <TextBlock Text="Logger" FontSize="20" HorizontalAlignment="Center" Grid.Column="2"/>
+            <StackPanel Grid.Row="1" Grid.Column="2">
+                <Rectangle Style="{StaticResource TitleLine}"/>
+                <CheckBox Content="Log information" Name="LogBool" Checked="LogBool_Checked" Unchecked="LogBool_Unchecked"  HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <Rectangle Style="{StaticResource SeparatorLine}" Grid.Column="2" Grid.Row="2" />
+
+            <StackPanel Name="LoggerInfo" Visibility="Collapsed" Grid.Column="2" Grid.Row="2">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Vertical" Margin="8,8,0,8">
+                        <TextBlock Text="Hours" />
+                        <TextBox Name="Hours" TextChanged="Time_TextChanged"/>
+                    </StackPanel>
+                    <StackPanel Margin="4,8" >
+                        <TextBlock />
+                        <TextBlock Text=":" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="0,8,8,8">
+                        <TextBlock Text="Minutes" />
+                        <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
+                    </StackPanel>
+                </StackPanel>
+                <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Select file name and location" Width="240" HorizontalAlignment="Right" Height="20" Margin="8" IsEnabled="False"/>
+            </StackPanel>
+
+            
 
         </Grid>
     </ScrollViewer>
