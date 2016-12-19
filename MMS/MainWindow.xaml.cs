@@ -348,6 +348,31 @@ namespace MMS
         }
 
         /// <summary>
+        /// Contains the time of the start of the test
+        /// </summary>
+        public static DateTime EndTime = new DateTime();
+
+        private static void CheckTime()
+        {
+            while (true)
+            {
+                if (DateTime.Now >= EndTime)
+                {
+                    GenContinue = false;
+                    return;
+                }
+            }
+        }
+
+        public static void SetTime()
+        {
+            EndTime = DateTime.Now;
+            EndTime.AddHours(HoursToAdd);
+            EndTime.AddMinutes(MinsToAdd);
+            new Thread(CheckTime).Start();
+        }
+
+        /// <summary>
         /// Starts or kills the test
         /// </summary>
         /// <param name="sender"></param>
@@ -393,6 +418,8 @@ namespace MMS
                             break;
                     }
                     #endregion
+
+
 
                     // Specifies the creation of slaves for clients
                     // All the slaves are created on the same thread
@@ -759,12 +786,18 @@ namespace MMS
         }
 
         /// <summary>
+        /// True: Logging is on. False: Logging if off
+        /// </summary>
+        public static bool LogBoolChecked;
+
+        /// <summary>
         /// Shows LoggerInfo
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void LogBool_Checked(object sender, RoutedEventArgs e)
         {
+            LogBoolChecked = true;
             LoggerInfo.Visibility = Visibility.Visible;
         }
 
@@ -775,10 +808,25 @@ namespace MMS
         /// <param name="e"></param>
         private void LogBool_Unchecked(object sender, RoutedEventArgs e)
         {
+            LogBoolChecked = false;
             LoggerInfo.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Hours to add to the current time
+        /// </summary>
+        private static int HoursToAdd;
 
+        /// <summary>
+        /// Minutes to add to the current time
+        /// </summary>
+        private static int MinsToAdd;
+
+        /// <summary>
+        /// Checks if SelectFileNameLocation can be enabled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Time_TextChanged(object sender, TextChangedEventArgs e)
         {
             List<bool> StatusBoolList = new List<bool>();
@@ -804,6 +852,8 @@ namespace MMS
                 else
                 {
                     SelectFileNameLocation.IsEnabled = true;
+                    HoursToAdd = Convert.ToInt32(Hours.Text);
+                    MinsToAdd = Convert.ToInt32(Minutes.Text);
                 }
                 TextBox_TextChanged(sender, e);
             }

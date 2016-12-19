@@ -71,11 +71,17 @@ namespace MMS
             master.Transport.ReadTimeout = TimeOutValue;
             if (RefreshData)
             {
-                while (true)
+                bool status = true;
+                if (MainWindow.LogBoolChecked)
+                {
+                    MainWindow.SetTime();
+                }
+                do
                 {
                     ScanIn(master);
                     Thread.Sleep(RefreshFreq);
-                }
+                    status = MainWindow.GenContinue;
+                } while (status);
             }
             else
             {
@@ -90,6 +96,10 @@ namespace MMS
         public static void Generated(List<string> input)
         {
             bool status = true;
+            if (MainWindow.LogBoolChecked)
+            {
+                MainWindow.SetTime();
+            }
             while (status)
             {
                 foreach (var item in input)
@@ -139,10 +149,14 @@ namespace MMS
                     }
                     else
                     {
+                        status = MainWindow.GenContinue;
+                        if (!status)
+                        {
+                            return;
+                        }
                         Thread.Sleep(RefreshFreq);
                     }
                 }
-                status = MainWindow.GenContinue;
             }
         }
 
