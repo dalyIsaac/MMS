@@ -62,9 +62,19 @@
                     <RadioButton Name="LiveInput" Checked="LiveInput_Checked" Margin="0,0,20,0">Live IED input</RadioButton>
                     <RadioButton Name="GenInput" Checked="GenInput_Checked" >Generated input</RadioButton>
                 </StackPanel>
-            </StackPanel>
 
-            <StackPanel Grid.Row="2" Name="InputSettingsRow2">
+                <!--RefreshSettings-->
+                <StackPanel Name="RefreshSettings">
+                    <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Unchecked" HorizontalAlignment="Center"/>
+
+                    <StackPanel Name="RefreshStackPanel" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
+                        <TextBox Text="400" Name="RefreshRate" TextChanged="TextBox_TextChanged"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="3" Name="InputSettingsRow2">
                 <Rectangle Style="{StaticResource SeparatorLine}"/>
 
                 <!--LiveInputSettings-->
@@ -161,19 +171,6 @@
 
             </StackPanel>
 
-            <!--RefreshSettings-->
-            <StackPanel Grid.Row="3" Name="RefreshSettings">
-                <Rectangle Style="{StaticResource SeparatorLine}"/>
-                <CheckBox Content="Continually refresh input" Name="RefreshBool" Checked="RefreshBool_Checked" Unchecked="RefreshBool_Unchecked" HorizontalAlignment="Center"/>
-
-                <StackPanel Name="RefreshStackPanel" Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="Refresh rate (ms):" Margin="0,0,8,0" />
-                    <TextBox Text="400" Name="RefreshRate" TextChanged="TextBox_TextChanged"/>
-                </StackPanel>
-
-
-            </StackPanel>
-
             <StackPanel Grid.Row="4" >
                 <Rectangle Style="{StaticResource SeparatorLine}"/>
             </StackPanel>
@@ -192,7 +189,7 @@
 
                 <!--Number of clients-->
                 <Rectangle Style="{StaticResource TitleLine}"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
                     <RadioButton Name="OneClient" Margin="0,0,20,0" Checked="OneClient_Checked">One client</RadioButton>
                     <RadioButton Name="TwoClients" Margin="0,0,20,0" Checked="TwoClients_Checked">Two clients</RadioButton>
                     <RadioButton Name="ThreeClients" Margin="0,0,20,0" Checked="ThreeClients_Checked">Three clients</RadioButton>
@@ -438,33 +435,34 @@
 
             <!--Logger-->
             <TextBlock Text="Logger" FontSize="20" HorizontalAlignment="Center" Grid.Column="2"/>
-            <StackPanel Grid.Row="1" Grid.Column="2">
+
+            <StackPanel Grid.Column="2" Grid.Row="1" Name="Duration">
                 <Rectangle Style="{StaticResource TitleLine}"/>
-                <CheckBox Content="Log information" Name="LogBool" Checked="LogBool_Checked" Unchecked="LogBool_Unchecked"  HorizontalAlignment="Center"/>
-            </StackPanel>
 
-            <StackPanel Grid.Column="2" Grid.Row="2">
-                <Rectangle Style="{StaticResource SeparatorLine}"  />
-
-                <StackPanel Name="LoggerInfo" Visibility="Collapsed" >
+                <StackPanel Name="LoggerInfo" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <StackPanel Orientation="Vertical" Margin="8,8,0,8">
+                        <StackPanel Orientation="Vertical" Margin="8,0,0,8">
                             <TextBlock Text="Hours" />
                             <TextBox Name="Hours" TextChanged="Time_TextChanged"/>
                         </StackPanel>
-                        <StackPanel Margin="4,8" >
+                        <StackPanel Margin="4,0" >
                             <TextBlock />
                             <TextBlock Text=":" />
                         </StackPanel>
-                        <StackPanel Orientation="Vertical" Margin="0,8,8,8">
+                        <StackPanel Orientation="Vertical" Margin="0,0,8,8">
                             <TextBlock Text="Minutes" />
                             <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
                         </StackPanel>
                     </StackPanel>
-                    <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Select file name and location" Width="240" HorizontalAlignment="Right" Height="20" Margin="8" />
+                    
                 </StackPanel>
             </StackPanel>
 
+            <StackPanel Grid.Column="2" Grid.Row="2" HorizontalAlignment="Center" Name="LogLocation">
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
+                <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Change log output location" Width="240"  HorizontalAlignment="Center" Height="20" Margin="0,0,0,8" />
+                <TextBlock Name="SelectedFolder" HorizontalAlignment="Center"/>
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 

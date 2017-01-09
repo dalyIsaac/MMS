@@ -42,12 +42,16 @@ namespace MMS
         /// </summary>
         private static void StartListening()
         {
+            //if (client)
+            //{
+
+            //}
             Task Listen1 = new Task(HostedSlave1.Listen);
             Listen1.Start();
-            Task Listen2 = new Task(HostedSlave2.Listen);
-            Listen2.Start();
-            Task Listen3 = new Task(HostedSlave3.Listen);
-            Listen3.Start();
+            //Task Listen2 = new Task(HostedSlave2.Listen);
+            //Listen2.Start();
+            //Task Listen3 = new Task(HostedSlave3.Listen);
+            //Listen3.Start();
         }
 
         #region Hosted Slave 1
@@ -346,6 +350,10 @@ namespace MMS
             {
                 Client3Port.Close();
             }
+            HostedSlave1 = null;
+            HostedSlave2 = null;
+            HostedSlave3 = null;
+            MainWindow.ProcessKilled = true;
         }
 
         /// <summary>

@@ -68,13 +68,13 @@ namespace MMS
         /// <param name="e"></param>
         private void PIMConnected_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
-        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// Checks that the start button can be enabled
         /// </summary>
-        private void SerialChoose_SelectionChanged()
+        private void CheckStartButton()
         {
             // Selected values for the clients
             object[] clients = new object[]
@@ -121,7 +121,10 @@ namespace MMS
                         int length = clients.Count(s => s != null);
                         if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
                         {
-                            Start.IsEnabled = true;
+                            if (HostedMB.LogDirectory != null)
+                            {
+                                Start.IsEnabled = true;
+                            }
                         }
                         else
                         {
@@ -151,7 +154,7 @@ namespace MMS
         /// <param name="e"></param>
         private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -161,7 +164,7 @@ namespace MMS
         /// <param name="e"></param>
         private void LiveInput_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
             GenInputSettings.Visibility = Visibility.Collapsed;
             LiveInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.ItemsSource = serialPorts;
@@ -174,7 +177,7 @@ namespace MMS
         /// <param name="e"></param>
         private void GenInput_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
             LiveInputSettings.Visibility = Visibility.Collapsed;
             GenInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.SelectedItem = null;
@@ -188,7 +191,7 @@ namespace MMS
         private void OneClient_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 0;
+            //clientTabs.SelectedIndex = 0;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.SelectedItem = null;
             Client3Serial.SelectedItem = null;
@@ -205,7 +208,7 @@ namespace MMS
         private void TwoClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 1;
+            //clientTabs.SelectedIndex = 1;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
             Client3Serial.SelectedItem = null;
@@ -222,7 +225,7 @@ namespace MMS
         private void ThreeClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 2;
+            //clientTabs.SelectedIndex = 2;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
             Client1.Visibility = Visibility.Visible;
@@ -299,7 +302,7 @@ namespace MMS
                     }
                 }
             }
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -316,7 +319,7 @@ namespace MMS
                     item.IsEnabled = true;
                 }
             }
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -366,6 +369,11 @@ namespace MMS
         private CancellationToken ct = new CancellationToken();
 
         /// <summary>
+        /// Used to notify when the start button can be enabled again
+        /// </summary>
+        public static bool ProcessKilled = false;
+
+        /// <summary>
         /// Starts or kills the test
         /// </summary>
         /// <param name="sender"></param>
@@ -374,6 +382,7 @@ namespace MMS
         {
             if ((string)Start.Content == "Start")
             {
+                ProcessKilled = false;
                 // Assigns the token source
                 tokenSource = new CancellationTokenSource();
                 ct = tokenSource.Token;
@@ -445,7 +454,14 @@ namespace MMS
             else
             {
                 tokenSource.Cancel();
+
+                while (!ProcessKilled)
+                {
+
+                }
+
                 Start.Content = "Start";
+                Start.IsEnabled = true;
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
                 EnableDisableSettings();
             }
@@ -624,6 +640,9 @@ namespace MMS
             #endregion
         }
 
+        /// <summary>
+        /// Starts generating values for the MMS
+        /// </summary>
         private void Generated()
         {
             GenItemsString = new List<string>();
@@ -646,6 +665,8 @@ namespace MMS
             InputSettingsRow1.IsEnabled = !InputSettingsRow1.IsEnabled;
             InputSettingsRow2.IsEnabled = !InputSettingsRow2.IsEnabled;
             RefreshSettings.IsEnabled = !RefreshSettings.IsEnabled;
+            LogLocation.IsEnabled = !LogLocation.IsEnabled;
+            Duration.IsEnabled = !Duration.IsEnabled;
             ClientSettingsRow1.IsEnabled = !ClientSettingsRow1.IsEnabled;
             ClientSettingsRow2.IsEnabled = !ClientSettingsRow2.IsEnabled;
             PIMConnected.IsEnabled = !PIMConnected.IsEnabled;
@@ -724,7 +745,7 @@ namespace MMS
                     StatusBool.Add(TextBoxCheck(item));
                     try
                     {
-                        SerialChoose_SelectionChanged();
+                        CheckStartButton();
                     }
                     catch (Exception)
                     {
@@ -774,7 +795,7 @@ namespace MMS
         {
             LogBoolChecked = true;
             LoggerInfo.Visibility = Visibility.Visible;
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -842,7 +863,9 @@ namespace MMS
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 HostedMB.LogDirectory = dialog.FileName;
+                SelectedFolder.Text = HostedMB.LogDirectory;
             }
+            CheckStartButton();
         }
     }
 }
