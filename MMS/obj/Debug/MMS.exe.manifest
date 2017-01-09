@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="MMS.exe" size="41472">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="MMS.exe" size="40960">
       <assemblyIdentity name="MMS" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>1IFzmpdqxIpGU8WUO3Tv2JUvtm9WulEqtFwjpcw9l7M=</dsig:DigestValue>
+        <dsig:DigestValue>/VfxNB1fN9jLeGp8y0F5I2WLao5Ra3SKax2DH18eHFs=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

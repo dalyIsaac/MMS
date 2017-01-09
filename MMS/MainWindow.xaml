@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:MMS"
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="1512" MinWidth="1512"
-        Closing="Window_Closing"
         >
 
     <Window.Resources>
@@ -37,7 +36,7 @@
     </Window.Resources>
 
     <ScrollViewer>
-        <Grid>
+        <Grid >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -444,27 +443,31 @@
                 <CheckBox Content="Log information" Name="LogBool" Checked="LogBool_Checked" Unchecked="LogBool_Unchecked"  HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <Rectangle Style="{StaticResource SeparatorLine}" Grid.Column="2" Grid.Row="2" />
+            <StackPanel Grid.Column="2" Grid.Row="2">
+                <Rectangle Style="{StaticResource SeparatorLine}"  />
 
-            <StackPanel Name="LoggerInfo" Visibility="Collapsed" Grid.Column="2" Grid.Row="2">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Vertical" Margin="8,8,0,8">
-                        <TextBlock Text="Hours" />
-                        <TextBox Name="Hours" TextChanged="Time_TextChanged"/>
+                <StackPanel Name="LoggerInfo" Visibility="Collapsed" >
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Vertical" Margin="8,8,0,8">
+                            <TextBlock Text="Hours" />
+                            <TextBox Name="Hours" TextChanged="Time_TextChanged"/>
+                        </StackPanel>
+                        <StackPanel Margin="4,8" >
+                            <TextBlock />
+                            <TextBlock Text=":" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="0,8,8,8">
+                            <TextBlock Text="Minutes" />
+                            <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Margin="4,8" >
-                        <TextBlock />
-                        <TextBlock Text=":" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="0,8,8,8">
-                        <TextBlock Text="Minutes" />
-                        <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
+                    <!--WarningLogLocation-->
+                    <StackPanel Grid.ColumnSpan="3" Visibility="Collapsed" Name="WarningLogLocation" Grid.Row="1" >
+                        <TextBlock Text="Warning - the file name cannot contain the following characters" Foreground="Red" HorizontalAlignment="Center" />
+                        <TextBlock Text="&#x003a; &#x003C; &#x003e; &#x0022; &#x002f; &#x005c; &#x007c; &#x003f; &#x002a;" Foreground="Red" HorizontalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
-                <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Select file name and location" Width="240" HorizontalAlignment="Right" Height="20" Margin="8" IsEnabled="False"/>
             </StackPanel>
-
-            
 
         </Grid>
     </ScrollViewer>
