@@ -461,11 +461,7 @@
                             <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
                         </StackPanel>
                     </StackPanel>
-                    <!--WarningLogLocation-->
-                    <StackPanel Grid.ColumnSpan="3" Visibility="Collapsed" Name="WarningLogLocation" Grid.Row="1" >
-                        <TextBlock Text="Warning - the file name cannot contain the following characters" Foreground="Red" HorizontalAlignment="Center" />
-                        <TextBlock Text="&#x003a; &#x003C; &#x003e; &#x0022; &#x002f; &#x005c; &#x007c; &#x003f; &#x002a;" Foreground="Red" HorizontalAlignment="Center" />
-                    </StackPanel>
+                    <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Select file name and location" Width="240" HorizontalAlignment="Right" Height="20" Margin="8" />
                 </StackPanel>
             </StackPanel>
 

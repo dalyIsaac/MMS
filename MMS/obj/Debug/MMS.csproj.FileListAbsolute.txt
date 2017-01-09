@@ -19,3 +19,12 @@ C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\MMS.application
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.application
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Debug\MMS.csprojResolveAssemblyReference.cache
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.ShellExtensions.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.xml
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.Shell.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.Shell.xml
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.ShellExtensions.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Debug\Microsoft.WindowsAPICodePack.ShellExtensions.xml

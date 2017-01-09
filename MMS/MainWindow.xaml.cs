@@ -1,9 +1,6 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -12,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace MMS
 {
@@ -360,7 +358,7 @@ namespace MMS
         /// <summary>
         /// Cancellation token source for the task
         /// </summary>
-        private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private static CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Cancellation token source for the task
@@ -390,6 +388,7 @@ namespace MMS
                     HostedMB.SlavesCreated = new bool[1];
                     Task Create = new Task(HostedMB.CreateHostedSlave1);
                     Create.Start();
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue };
                 }
                 else if ((bool)TwoClients.IsChecked)
                 {
@@ -401,6 +400,7 @@ namespace MMS
 
                     Task Create = new Task(HostedMB.CreateHostedSlave1And2);
                     Create.Start();
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue };
                 }
                 else
                 {
@@ -417,6 +417,7 @@ namespace MMS
 
                     Task Create = new Task(HostedMB.CreateHostedSlave1And2And3);
                     Create.Start();
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue, (string)Client3Serial.SelectedValue };
                 }
 
                 while (HostedMB.SlavesCreated.Contains(false))
@@ -438,6 +439,8 @@ namespace MMS
 
                 Start.Content = "Stop";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
+                Task Stop = new Task(EndAfterDuration);
+                //Stop.Start();
             }
             else
             {
@@ -446,6 +449,12 @@ namespace MMS
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
                 EnableDisableSettings();
             }
+        }
+
+        private static void EndAfterDuration()
+        {
+            Thread.Sleep(5000);
+            tokenSource.Cancel();
         }
 
         /// <summary>
@@ -818,6 +827,21 @@ namespace MMS
                     MinsToAdd = Convert.ToInt32(Minutes.Text);
                 }
                 TextBox_TextChanged(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Selects the folder location for the logs
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectFileNameLocation_Click(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                HostedMB.LogDirectory = dialog.FileName;
             }
         }
     }

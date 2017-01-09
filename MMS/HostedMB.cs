@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,23 @@ namespace MMS
             CreateHostedSlave3();
         }
 
+        /// <summary>
+        /// True: slave created. False: slave not created
+        /// </summary>
         public static bool[] SlavesCreated;
+
+        /// <summary>
+        /// Tells the slaves to start listening
+        /// </summary>
+        private static void StartListening()
+        {
+            Task Listen1 = new Task(HostedSlave1.Listen);
+            Listen1.Start();
+            Task Listen2 = new Task(HostedSlave2.Listen);
+            Listen2.Start();
+            Task Listen3 = new Task(HostedSlave3.Listen);
+            Listen3.Start();
+        }
 
         #region Hosted Slave 1
         /// <summary>
@@ -48,25 +65,19 @@ namespace MMS
             HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
             HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
             HostedSlave1.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave1_Request_Event);
-            Task Listen1 = new Task(HostedSlave1.Listen);
-            Listen1.Start();
             SlavesCreated[0] = true;
         }
 
         /// <summary>
-        /// Event for incrementing HostedSlave1RequestNum
+        /// Writes to the log when a request for data is received
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private static void HostedSlave1_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
         {
-            HostedSlave1RequestNum++;
+            File.AppendAllText(LogFileNames[0], WriteLine());
         }
 
-        /// <summary>
-        /// Stores the number of requests that HostedSlave1 has received
-        /// </summary>
-        public static ulong HostedSlave1RequestNum;
         #endregion
 
         #region Hosted Slave 2
@@ -84,25 +95,19 @@ namespace MMS
             HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
             HostedSlave2.DataStore = HostedSlave1.DataStore;
             HostedSlave2.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave2_Request_Event);
-            Task Listen2 = new Task(HostedSlave2.Listen);
-            Listen2.Start();
             SlavesCreated[1] = true;
         }
 
         /// <summary>
-        /// Event for incrementing HostedSlave2RequestNum
+        /// Writes to the log when a request for data is received
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private static void HostedSlave2_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
         {
-            HostedSlave2RequestNum++;
+            File.AppendAllText(LogFileNames[1], WriteLine());
         }
 
-        /// <summary>
-        /// Stores the number of requests that HostedSlave2 has received
-        /// </summary>
-        public static ulong HostedSlave2RequestNum;
         #endregion
 
         #region Hosted Slave 3
@@ -120,25 +125,19 @@ namespace MMS
             HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
             HostedSlave3.DataStore = HostedSlave1.DataStore;
             HostedSlave3.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave3_Request_Event);
-            Task Listen3 = new Task(HostedSlave3.Listen);
-            Listen3.Start();
             SlavesCreated[2] = true;
         }
 
         /// <summary>
-        /// Event for incrementing HostedSlave3RequestNum
+        /// Writes to the log when a request for data is received
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private static void HostedSlave3_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
         {
-            HostedSlave3RequestNum++;
+            File.AppendAllText(LogFileNames[2], WriteLine());
         }
 
-        /// <summary>
-        /// Stores the number of requests that HostedSlave3 has received
-        /// </summary>
-        public static ulong HostedSlave3RequestNum;
         #endregion
 
         #region Clients
@@ -159,11 +158,16 @@ namespace MMS
         #endregion
 
         /// <summary>
+        /// Contains the log's directory
+        /// </summary>
+        public static string LogDirectory;
+
+        #region Live
+        /// <summary>
         /// Hosted Master Input port
         /// </summary>
         public static SerialPort HostedMasterPort;
 
-        #region Live
         /// <summary>
         /// Contains the user's settings on the frequency of the data input refreshing
         /// </summary>
@@ -179,6 +183,8 @@ namespace MMS
         /// </summary>
         public static void Live(CancellationToken ct)
         {
+            CreateCSV("Live");
+            StartListening();
             HostedMasterPort.Open();
             IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HostedMasterPort);
             master.Transport.ReadTimeout = TimeOutValue;
@@ -188,9 +194,8 @@ namespace MMS
                 Thread.Sleep(RefreshFreq);
             }
             ClosePorts();
-            // Write CSV here
+            LogFileNames = null;
         }
-
 
         /// <summary>
         /// Scans in data from the IED and writes it
@@ -214,6 +219,8 @@ namespace MMS
         /// </summary>
         public static void Generated(CancellationToken ct)
         {
+            CreateCSV("Generated");
+            StartListening();
             while (!ct.IsCancellationRequested)
             {
                 foreach (var item in MainWindow.GenItemsString)
@@ -257,11 +264,11 @@ namespace MMS
                             }
                             break;
                     }
-                        Thread.Sleep(RefreshFreq);
+                    Thread.Sleep(RefreshFreq);
                 }
             }
-            // Write CSV here
             ClosePorts();
+            LogFileNames = null;
         }
 
         /// <summary>
@@ -339,6 +346,77 @@ namespace MMS
             {
                 Client3Port.Close();
             }
+        }
+
+        /// <summary>
+        /// Contains a list of the output ports
+        /// </summary>
+        public static string[] OutputPorts;
+
+        /// <summary>
+        /// Contains a list of the log file names and directories
+        /// </summary>
+        private static string[] LogFileNames;
+
+        /// <summary>
+        /// Creates the CSV log file
+        /// </summary>
+        /// <param name="Type"></param>
+        private static void CreateCSV(string Type)
+        {
+            LogFileNames = new string[SlavesCreated.Length];
+
+            for (int i = 0; i < SlavesCreated.Length; i++)
+            {
+                LogFileNames[i] = $"{LogDirectory}\\{OutputPorts[i]}_{Type}_{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}_{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}.csv";
+
+                File.WriteAllText(LogFileNames[i], CreateHeaderString());
+            }
+        }
+
+        /// <summary>
+        /// Creates the header string
+        /// </summary>
+        /// <returns></returns>
+        private static string CreateHeaderString()
+        {
+            string header = "Date,Time";
+            for (int i = 0; i < 272; i += 2)
+            {
+                header += $",{30001 + i}";
+            }
+            header += Environment.NewLine;
+            return header;
+        }
+
+        private static string WriteLine()
+        {
+            string line = $"{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year},{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
+            for (int i = 0; i < 272; i += 2)
+            {
+                float result = BinaryToFloat(new ushort[] { HostedSlave1.DataStore.InputRegisters[i + 1], HostedSlave1.DataStore.InputRegisters[i + 2] });
+                line += $",{result}";
+            }
+            line += Environment.NewLine;
+            return line;
+        }
+
+        /// <summary>
+        /// Converts the input from the two registers to a single floating point value
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        private static float BinaryToFloat(ushort[] values)
+        {
+            byte[] asByte = new byte[] {
+                (byte)(values[1] % 256),
+                (byte)(values[1] / 256),
+                (byte)(values[0] % 256),
+                (byte)(values[0] / 256),
+            };
+            float result = BitConverter.ToSingle(asByte, 0);
+
+            return result;
         }
     }
 }
