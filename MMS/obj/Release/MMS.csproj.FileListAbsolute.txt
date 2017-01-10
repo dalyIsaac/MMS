@@ -18,3 +18,12 @@ C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\MMS.application
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.exe.manifest
 C:\Users\15028598738\Source\Repos\MMS\MMS\obj\Release\MMS.application
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.xml
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.Shell.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.Shell.xml
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.pdb
+C:\Users\15028598738\Source\Repos\MMS\MMS\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.xml

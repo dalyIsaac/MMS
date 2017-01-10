@@ -1,6 +1,8 @@
 ﻿using Modbus.Device;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -12,25 +14,139 @@ namespace MMS
     public static class HostedMB
     {
         /// <summary>
-        /// Hosted Master Input port
+        /// References CreateHostedSlave1 and CreateHostedSlave2
         /// </summary>
-        public static SerialPort HostedMasterPort;
+        public static void CreateHostedSlave1And2()
+        {
+            CreateHostedSlave1();
+            CreateHostedSlave2();
+        }
 
+        /// <summary>
+        /// References CreateHostedSlave1, CreateHostedSlave2, and CreateHostedSlave3
+        /// </summary>
+        public static void CreateHostedSlave1And2And3()
+        {
+            CreateHostedSlave1();
+            CreateHostedSlave2();
+            CreateHostedSlave3();
+        }
+
+        /// <summary>
+        /// True: slave created. False: slave not created
+        /// </summary>
+        public static bool[] SlavesCreated;
+
+        /// <summary>
+        /// Tells the slaves to start listening
+        /// </summary>
+        private static void StartListening()
+        {
+            Task Listen1 = new Task(HostedSlave1.Listen);
+            Listen1.Start();
+            if (HostedSlave2 != null)
+            {
+                Task Listen2 = new Task(HostedSlave2.Listen);
+                Listen2.Start();
+                if (HostedSlave3 != null)
+                {
+                    Task Listen3 = new Task(HostedSlave3.Listen);
+                    Listen3.Start();
+                }
+            }
+        }
+
+        #region Hosted Slave 1
         /// <summary>
         /// Hosted Slave 1
         /// </summary>
         private static ModbusSerialSlave HostedSlave1;
 
         /// <summary>
+        /// Creates Hosted Slave 1
+        /// </summary>
+        public static void CreateHostedSlave1()
+        {
+            Client1Port.Open();
+            HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
+            HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
+            HostedSlave1.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave1_Request_Event);
+            SlavesCreated[0] = true;
+        }
+
+        /// <summary>
+        /// Writes to the log when a request for data is received
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave1_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            File.AppendAllText(LogFileNames[0], WriteLine());
+        }
+
+        #endregion
+
+        #region Hosted Slave 2
+        /// <summary>
         /// Hosted Slave 2
         /// </summary>
         private static ModbusSerialSlave HostedSlave2;
 
         /// <summary>
+        /// Creates hosted slave 2
+        /// </summary>
+        private static void CreateHostedSlave2()
+        {
+            Client2Port.Open();
+            HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
+            HostedSlave2.DataStore = HostedSlave1.DataStore;
+            HostedSlave2.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave2_Request_Event);
+            SlavesCreated[1] = true;
+        }
+
+        /// <summary>
+        /// Writes to the log when a request for data is received
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave2_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            File.AppendAllText(LogFileNames[1], WriteLine());
+        }
+
+        #endregion
+
+        #region Hosted Slave 3
+        /// <summary>
         /// Hosted Slave 3
         /// </summary>
         private static ModbusSerialSlave HostedSlave3;
 
+        /// <summary>
+        /// Creates hosted slave 3
+        /// </summary>
+        private static void CreateHostedSlave3()
+        {
+            Client3Port.Open();
+            HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
+            HostedSlave3.DataStore = HostedSlave1.DataStore;
+            HostedSlave3.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave3_Request_Event);
+            SlavesCreated[2] = true;
+        }
+
+        /// <summary>
+        /// Writes to the log when a request for data is received
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void HostedSlave3_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
+        {
+            File.AppendAllText(LogFileNames[2], WriteLine());
+        }
+
+        #endregion
+
+        #region Clients
         /// <summary>
         /// Client 1 port
         /// </summary>
@@ -45,16 +161,18 @@ namespace MMS
         /// Client 3 port
         /// </summary>
         public static SerialPort Client3Port;
+        #endregion
 
         /// <summary>
-        /// Timeout value for the hosted master receiving data
+        /// Contains the log's directory
         /// </summary>
-        public static int TimeOutValue;
+        public static string LogDirectory = "C:\\Users\\15028598738\\Documents\\MMS Log";
 
+        #region Live
         /// <summary>
-        /// Contains the user's setting whether the data should be continually refreshed
+        /// Hosted Master Input port
         /// </summary>
-        public static bool RefreshData;
+        public static SerialPort HostedMasterPort;
 
         /// <summary>
         /// Contains the user's settings on the frequency of the data input refreshing
@@ -62,37 +180,56 @@ namespace MMS
         public static int RefreshFreq;
 
         /// <summary>
+        /// Timeout value for the hosted master receiving data
+        /// </summary>
+        public static int TimeOutValue;
+
+        /// <summary>
         /// Executes with live input
         /// </summary>
-        public static void Live()
+        public static void Live(CancellationToken ct)
         {
+            CreateCSV("Live");
+            StartListening();
             HostedMasterPort.Open();
             IModbusSerialMaster master = ModbusSerialMaster.CreateRtu(HostedMasterPort);
             master.Transport.ReadTimeout = TimeOutValue;
-            if (RefreshData)
-            {
-                while (true)
-                {
-                    ScanIn(master);
-                    Thread.Sleep(RefreshFreq);
-                }
-            }
-            else
+            while (!ct.IsCancellationRequested)
             {
                 ScanIn(master);
+                Thread.Sleep(RefreshFreq);
             }
+            ClosePorts();
+            LogFileNames = null;
         }
 
         /// <summary>
+        /// Scans in data from the IED and writes it
+        /// </summary>
+        /// <param name="master"></param>
+        /// <returns></returns>
+        private static void ScanIn(IModbusMaster master)
+        {
+            for (int i = 0; i < 272; i += 2)
+            {
+                ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
+                //float itemsFloat = BinaryToFloat(items); // Checks that the data is correct
+                WriteValues(items, i);
+            }
+        }
+        #endregion
+
+        #region Generated
+        /// <summary>
         /// Generated values to be written to the DataStore
         /// </summary>
-        /// <param name="input"></param>
-        public static void Generated(List<string> input)
+        public static void Generated(CancellationToken ct)
         {
-            bool status = true;
-            while (status)
+            CreateCSV("Generated");
+            StartListening();
+            while (!ct.IsCancellationRequested)
             {
-                foreach (var item in input)
+                foreach (var item in MainWindow.GenItemsString)
                 {
                     switch (item)
                     {
@@ -133,174 +270,11 @@ namespace MMS
                             }
                             break;
                     }
-                    if (!RefreshData)
-                    {
-                        status = false;
-                    }
-                    else
-                    {
-                        Thread.Sleep(RefreshFreq);
-                    }
-                }
-                status = MainWindow.GenContinue;
-            }
-        }
-
-        /// <summary>
-        /// Writes values to the DataStore
-        /// </summary>
-        private static void WriteValues(ushort[] items, int i)
-        {
-            HostedSlave1.DataStore.InputRegisters[i + 1] = items[0];
-            HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
-        }
-
-        /// <summary>
-        /// Set to true when the datastore has been completed
-        /// </summary>
-        public static bool CreateHostedSlave1Status = false;
-
-        /// <summary>
-        /// Creates hosted slave 1
-        /// </summary>
-        public static void CreateHostedSlave1()
-        {
-            Client1Port.Open();
-            HostedSlave1 = ModbusSerialSlave.CreateRtu(1, Client1Port);
-            HostedSlave1.DataStore = Modbus.Data.DataStoreFactory.CreateDefaultDataStore(0, 0, 0, 65535);
-            HostedSlave1.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave1_Request_Event);
-            CreateHostedSlave1Status = true;
-            new Thread(HostedSlave1.Listen).Start();
-        }
-
-        /// <summary>
-        /// Stores the number of requests that HostedSlave1 has received
-        /// </summary>
-        public static ulong HostedSlave1RequestNum;
-
-        /// <summary>
-        /// Event for incrementing HostedSlave1RequestNum
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void HostedSlave1_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
-        {
-            HostedSlave1RequestNum++;
-        }
-
-        /// <summary>
-        /// Stores the number of requests that HostedSlave2 has received
-        /// </summary>
-        public static ulong HostedSlave2RequestNum;
-
-        /// <summary>
-        /// Event for incrementing HostedSlave2RequestNum
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void HostedSlave2_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
-        {
-            HostedSlave2RequestNum++;
-        }
-
-        /// <summary>
-        /// Stores the number of requests that HostedSlave3 has received
-        /// </summary>
-        public static ulong HostedSlave3RequestNum;
-
-        /// <summary>
-        /// Event for incrementing HostedSlave3RequestNum
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void HostedSlave3_Request_Event(object sender, ModbusSlaveRequestEventArgs e)
-        {
-            HostedSlave3RequestNum++;
-        }
-
-        /// <summary>
-        /// References CreateHostedSlave1 and CreateHostedSlave2
-        /// </summary>
-        public static void CreateHostedSlave1And2()
-        {
-            CreateHostedSlave1();
-            CreateHostedSlave2();
-        }
-
-        /// <summary>
-        /// Creates hosted slave 2
-        /// </summary>
-        private static void CreateHostedSlave2()
-        {
-            Client2Port.Open();
-            HostedSlave2 = ModbusSerialSlave.CreateRtu(1, Client2Port);
-            HostedSlave2.DataStore = HostedSlave1.DataStore;
-            HostedSlave2.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave2_Request_Event);
-            new Thread(HostedSlave2.Listen).Start();
-        }
-
-        /// <summary>
-        /// References CreateHostedSlave1, CreateHostedSlave2, and CreateHostedSlave3
-        /// </summary>
-        public static void CreateHostedSlave1And2And3()
-        {
-            CreateHostedSlave1();
-            CreateHostedSlave2();
-            CreateHostedSlave3();
-        }
-
-        /// <summary>
-        /// Creates hosted slave 3
-        /// </summary>
-        private static void CreateHostedSlave3()
-        {
-            Client3Port.Open();
-            HostedSlave3 = ModbusSerialSlave.CreateRtu(1, Client3Port);
-            HostedSlave3.DataStore = HostedSlave1.DataStore;
-            HostedSlave3.ModbusSlaveRequestReceived += new EventHandler<ModbusSlaveRequestEventArgs>(HostedSlave3_Request_Event);
-            new Thread(HostedSlave3.Listen).Start();
-        }
-
-        /// <summary>
-        /// Scanns in data from the IED and writes it
-        /// </summary>
-        /// <param name="master"></param>
-        /// <param name="index"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
-        private static void ScanIn(IModbusMaster master)
-        {
-            try
-            {
-                for (int i = 0; i < 272; i += 2)
-                {
-                    ushort[] items = master.ReadInputRegisters(1, (ushort)i, 2);
-                    //float itemsFloat = BinaryToFloat(items); // Checks that the data is correct
-                    WriteValues(items, i);
+                    Thread.Sleep(RefreshFreq);
                 }
             }
-            catch (Exception)
-            {
-                Thread.CurrentThread.Abort();
-            }
-        }
-
-        /// <summary>
-        /// Converts the input from the two registers to a single floating point value
-        /// </summary>
-        /// <param name="values"></param>
-        /// <returns></returns>
-        private static float BinaryToFloat(ushort[] values)
-        {
-            byte[] asByte = new byte[] {
-                (byte)(values[1] % 256),
-                (byte)(values[1] / 256),
-                (byte)(values[0] % 256),
-                (byte)(values[0] / 256),
-            };
-            float result = BitConverter.ToSingle(asByte, 0);
-
-            return result;
+            ClosePorts();
+            LogFileNames = null;
         }
 
         /// <summary>
@@ -345,6 +319,114 @@ namespace MMS
             string secondHalf = stringResult.Substring((stringResult.Length / 2), (stringResult.Length / 2));
 
             return new ushort[] { Convert.ToUInt16(firstHalf, 2), Convert.ToUInt16(secondHalf, 2) };
+        }
+        #endregion
+
+        /// <summary>
+        /// Writes values to the DataStore
+        /// </summary>
+        private static void WriteValues(ushort[] items, int i)
+        {
+            HostedSlave1.DataStore.InputRegisters[i + 1] = items[0];
+            HostedSlave1.DataStore.InputRegisters[i + 2] = items[1];
+        }
+
+        /// <summary>
+        /// Closes the ports
+        /// </summary>
+        private static void ClosePorts()
+        {
+            if (HostedMasterPort != null)
+            {
+                HostedMasterPort.Close();
+            }
+            if (Client1Port != null)
+            {
+                Client1Port.Close();
+            }
+            if (Client2Port != null)
+            {
+                Client2Port.Close();
+            }
+            if (Client3Port != null)
+            {
+                Client3Port.Close();
+            }
+            HostedSlave1 = null;
+            HostedSlave2 = null;
+            HostedSlave3 = null;
+            MainWindow.ProcessKilled = true;
+        }
+
+        /// <summary>
+        /// Contains a list of the output ports
+        /// </summary>
+        public static string[] OutputPorts;
+
+        /// <summary>
+        /// Contains a list of the log file names and directories
+        /// </summary>
+        private static string[] LogFileNames;
+
+        /// <summary>
+        /// Creates the CSV log file
+        /// </summary>
+        /// <param name="Type"></param>
+        private static void CreateCSV(string Type)
+        {
+            LogFileNames = new string[SlavesCreated.Length];
+
+            for (int i = 0; i < SlavesCreated.Length; i++)
+            {
+                LogFileNames[i] = $"{LogDirectory}\\{OutputPorts[i]}_{Type}_{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}_{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}.csv";
+
+                File.WriteAllText(LogFileNames[i], CreateHeaderString());
+            }
+        }
+
+        /// <summary>
+        /// Creates the header string
+        /// </summary>
+        /// <returns></returns>
+        private static string CreateHeaderString()
+        {
+            string header = "Date,Time";
+            for (int i = 0; i < 272; i += 2)
+            {
+                header += $",{30001 + i}";
+            }
+            header += Environment.NewLine;
+            return header;
+        }
+
+        private static string WriteLine()
+        {
+            string line = $"{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year},{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
+            for (int i = 0; i < 272; i += 2)
+            {
+                float result = BinaryToFloat(new ushort[] { HostedSlave1.DataStore.InputRegisters[i + 1], HostedSlave1.DataStore.InputRegisters[i + 2] });
+                line += $",{result}";
+            }
+            line += Environment.NewLine;
+            return line;
+        }
+
+        /// <summary>
+        /// Converts the input from the two registers to a single floating point value
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        private static float BinaryToFloat(ushort[] values)
+        {
+            byte[] asByte = new byte[] {
+                (byte)(values[1] % 256),
+                (byte)(values[1] / 256),
+                (byte)(values[0] % 256),
+                (byte)(values[0] / 256),
+            };
+            float result = BitConverter.ToSingle(asByte, 0);
+
+            return result;
         }
     }
 }

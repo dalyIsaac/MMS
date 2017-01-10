@@ -4,10 +4,13 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Windows.Threading;
 
 namespace MMS
 {
@@ -28,6 +31,7 @@ namespace MMS
         {
             InitializeComponent();
             GeneratedItemsCheckbox = new CheckBox[] { ZeroValues, P9_99, N9_99, AddressIsValue, MaxValue, MinValue }; // Loads the GeneratedItems checkboxes into a list
+            TextBoxArray = new TextBox[] { BaudRate, DataBits, Timeout, RefreshRate, Client1BaudRate, Client1DataBits, Client2BaudRate, Client2DataBits, Client3BaudRate, Client3DataBits, Hours, Minutes };
             CheckSerial();
         }
 
@@ -65,13 +69,13 @@ namespace MMS
         /// <param name="e"></param>
         private void PIMConnected_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
-        /// Checks that the COM ports selected are not used more than once, and checks if the start button can be enabled
+        /// Checks that the start button can be enabled
         /// </summary>
-        private void SerialChoose_SelectionChanged()
+        private void CheckStartButton()
         {
             // Selected values for the clients
             object[] clients = new object[]
@@ -105,6 +109,8 @@ namespace MMS
                 }
             }
 
+            // Checks if the logger is enabled
+
             // Checks that there are no errors, and whether or not a connection can be initiated
             if (WarningIED.Visibility == Visibility.Collapsed && WarningClient.Visibility == Visibility.Collapsed && WarningTextBlock.Visibility == Visibility.Collapsed)
             {
@@ -116,7 +122,21 @@ namespace MMS
                         int length = clients.Count(s => s != null);
                         if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
                         {
-                            Start.IsEnabled = true;
+                            if (!(bool)DurationCheckbox.IsChecked)
+                            {
+                                Start.IsEnabled = true;
+                            }
+                            else
+                            {
+                                if (Hours.Text != "" && Minutes.Text != "")
+                                {
+                                    Start.IsEnabled = true;
+                                }
+                                else
+                                {
+                                    Start.IsEnabled = false;
+                                }
+                            }
                         }
                         else
                         {
@@ -146,7 +166,7 @@ namespace MMS
         /// <param name="e"></param>
         private void SerialChoose_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -156,7 +176,7 @@ namespace MMS
         /// <param name="e"></param>
         private void LiveInput_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
             GenInputSettings.Visibility = Visibility.Collapsed;
             LiveInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.ItemsSource = serialPorts;
@@ -169,7 +189,7 @@ namespace MMS
         /// <param name="e"></param>
         private void GenInput_Checked(object sender, RoutedEventArgs e)
         {
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
             LiveInputSettings.Visibility = Visibility.Collapsed;
             GenInputSettings.Visibility = Visibility.Visible;
             SerialChooseIED.SelectedItem = null;
@@ -183,7 +203,7 @@ namespace MMS
         private void OneClient_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 0;
+            //clientTabs.SelectedIndex = 0;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.SelectedItem = null;
             Client3Serial.SelectedItem = null;
@@ -200,7 +220,7 @@ namespace MMS
         private void TwoClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 1;
+            //clientTabs.SelectedIndex = 1;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
             Client3Serial.SelectedItem = null;
@@ -217,7 +237,7 @@ namespace MMS
         private void ThreeClients_Checked(object sender, RoutedEventArgs e)
         {
             clientTabs.Visibility = Visibility.Visible;
-            clientTabs.SelectedIndex = 2;
+            //clientTabs.SelectedIndex = 2;
             Client1Serial.ItemsSource = serialPorts;
             Client2Serial.ItemsSource = serialPorts;
             Client1.Visibility = Visibility.Visible;
@@ -272,7 +292,6 @@ namespace MMS
             }
         }
 
-
         /// <summary>
         /// Ensures that only one checkbox can be checked if the input is not refreshing, for generated settings
         /// </summary>
@@ -295,7 +314,7 @@ namespace MMS
                     }
                 }
             }
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -312,7 +331,7 @@ namespace MMS
                     item.IsEnabled = true;
                 }
             }
-            SerialChoose_SelectionChanged();
+            CheckStartButton();
         }
 
         /// <summary>
@@ -347,214 +366,339 @@ namespace MMS
         }
 
         /// <summary>
+        /// Contains a list of the generated items
+        /// </summary>
+        public static List<string> GenItemsString;
+
+        /// <summary>
+        /// Cancellation token source for the task
+        /// </summary>
+        private static CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+        /// <summary>
+        /// Cancellation token source for the task
+        /// </summary>
+        private CancellationToken ct = new CancellationToken();
+
+        /// <summary>
+        /// Dispatcher timer
+        /// </summary>
+        private DispatcherTimer _timer;
+        
+        /// <summary>
+        /// Time
+        /// </summary>
+        private TimeSpan _time;
+
+        /// <summary>
         /// Starts or kills the test
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Start_Click(object sender, RoutedEventArgs e)
+        private async void Start_Click(object sender, RoutedEventArgs e)
         {
             if ((string)Start.Content == "Start")
             {
+                // Assigns the token source
+                tokenSource = new CancellationTokenSource();
+                ct = tokenSource.Token;
+
                 EnableDisableSettings();
-                #region Client 1 settings
-
-                // Checks if the COM port selected is being used
-                if (!TestSerialPort((string)Client1Serial.SelectedValue))
+                if (!Client1Settings())
                 {
+                    return;
                 }
-                else
-                {
-                    HostedMB.Client1Port = new SerialPort()
-                    {
-                        PortName = (string)Client1Serial.SelectedValue,
-                        BaudRate = Convert.ToInt32(Client1BaudRate.Text),
-                        DataBits = Convert.ToInt32(Client1DataBits.Text)
-                    };
-                    switch (Client1ParityComboBox.Text)
-                    {
-                        case "None":
-                            HostedMB.Client1Port.Parity = Parity.None;
-                            break;
-                        case "Odd":
-                            HostedMB.Client1Port.Parity = Parity.Odd;
-                            break;
-                        case "Even":
-                            HostedMB.Client1Port.Parity = Parity.Even;
-                            break;
-                    }
-                    switch (Client1StopBitsComboBox.Text)
-                    {
-                        case "1":
-                            HostedMB.Client1Port.StopBits = StopBits.One;
-                            break;
-                        case "2":
-                            HostedMB.Client1Port.StopBits = StopBits.Two;
-                            break;
-                    }
-                    #endregion
-
-                    // Specifies the creation of slaves for clients
-                    // All the slaves are created on the same thread
-                    if ((bool)OneClient.IsChecked)
-                    {
-                        new Thread(HostedMB.CreateHostedSlave1).Start();
-                    }
-                    else if ((bool)TwoClients.IsChecked)
-                    {
-                        if (!TestSerialPort((string)Client2Serial.SelectedValue))
-                        {
-                            return;
-                        }
-                        Client2Settings();
-                        new Thread(HostedMB.CreateHostedSlave1And2).Start();
-                    }
-                    else
-                    {
-                        if (!TestSerialPort((string)Client2Serial.SelectedValue))
-                        {
-                            return;
-                        }
-                        Client2Settings();
-                        if (!TestSerialPort((string)Client3Serial.SelectedValue))
-                        {
-                            return;
-                        }
-                        #region Client 3 settings
-                        HostedMB.Client3Port = new SerialPort()
-                        {
-                            PortName = (string)Client3Serial.SelectedValue,
-                            BaudRate = Convert.ToInt32(Client3BaudRate.Text),
-                            DataBits = Convert.ToInt32(Client3DataBits.Text)
-                        };
-                        switch (Client3ParityComboBox.Text)
-                        {
-                            case "None":
-                                HostedMB.Client3Port.Parity = Parity.None;
-                                break;
-                            case "Odd":
-                                HostedMB.Client3Port.Parity = Parity.Odd;
-                                break;
-                            case "Even":
-                                HostedMB.Client3Port.Parity = Parity.Even;
-                                break;
-                        }
-                        switch (Client3StopBitsComboBox.Text)
-                        {
-                            case "1":
-                                HostedMB.Client3Port.StopBits = StopBits.One;
-                                break;
-                            case "2":
-                                HostedMB.Client3Port.StopBits = StopBits.Two;
-                                break;
-                        }
-                        #endregion
-                        new Thread(HostedMB.CreateHostedSlave1And2And3).Start();
-                    }
-
-                    HostedMB.HostedSlave1RequestNum = 0;
-                    HostedMB.HostedSlave2RequestNum = 0;
-                    HostedMB.HostedSlave3RequestNum = 0;
-
-                    // Ensures that data input does not begin before the data store is created
-                    while (!HostedMB.CreateHostedSlave1Status)
-                    {
-
-                    }
-
-                    HostedMB.RefreshData = (bool)RefreshBool.IsChecked;
-                    if (HostedMB.RefreshData)
-                    {
-                        HostedMB.RefreshFreq = Convert.ToInt32(RefreshRate.Text);
-                    }
-
-                    Start.Content = "Stop";
-                    Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
-
-                    #region Live vs. Generated
-                    if ((bool)LiveInput.IsChecked)
-                    {
-                        if (!TestSerialPort((string)SerialChooseIED.SelectedValue))
-                        {
-                            return;
-                        }
-                        #region Hosted Master Port settings
-                        HostedMB.HostedMasterPort = new SerialPort()
-                        {
-                            PortName = (string)SerialChooseIED.SelectedItem,
-                            BaudRate = Convert.ToInt32(BaudRate.Text),
-                            DataBits = Convert.ToInt32(DataBits.Text),
-                        };
-                        switch (ParityComboBox.Text)
-                        {
-                            case "None":
-                                HostedMB.HostedMasterPort.Parity = Parity.None;
-                                break;
-                            case "Odd":
-                                HostedMB.HostedMasterPort.Parity = Parity.Odd;
-                                break;
-                            case "Even":
-                                HostedMB.HostedMasterPort.Parity = Parity.Even;
-                                break;
-                        }
-                        switch (StopBitsComboBox.Text)
-                        {
-                            case "1":
-                                HostedMB.HostedMasterPort.StopBits = StopBits.One;
-                                break;
-                            case "2":
-                                HostedMB.HostedMasterPort.StopBits = StopBits.Two;
-                                break;
-                        }
-                        #endregion
-                        HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
-
-                        new Thread(HostedMB.Live).Start(); // Starts static class in new thread
-                    }
-                    else
-                    {
-                        List<string> GenItemsString = new List<string>();
-                        GenContinue = true;
-                        foreach (var item in GeneratedItemsCheckbox)
-                        {
-                            if ((bool)item.IsChecked)
-                            {
-                                GenItemsString.Add(item.Name);
-                            }
-                        }
-                        new Thread(() => HostedMB.Generated(GenItemsString)).Start();
-                    }
-                    #endregion
-                }
-            }
-            else
-            {
-                EnableDisableSettings();
-                KillThreads();
-                string text;
-                string caption;
-                MessageBoxButton button;
-                MessageBoxImage icon;
-
                 if ((bool)OneClient.IsChecked)
                 {
-                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests";
+                    HostedMB.SlavesCreated = new bool[1];
+                    await Task.Run(() => HostedMB.CreateHostedSlave1());
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue };
                 }
                 else if ((bool)TwoClients.IsChecked)
                 {
-                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests\nClient 2 ({HostedMB.Client2Port.PortName}): {HostedMB.HostedSlave2RequestNum} requests";
+                    HostedMB.SlavesCreated = new bool[2];
+                    if (!Client2Settings())
+                    {
+                        return;
+                    }
+
+                    await Task.Run(() => HostedMB.CreateHostedSlave1And2());
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue };
                 }
                 else
                 {
-                    text = $"Client 1 ({HostedMB.Client1Port.PortName}): {HostedMB.HostedSlave1RequestNum} requests\nClient 2 ({HostedMB.Client2Port.PortName}): {HostedMB.HostedSlave2RequestNum} requests\nClient 3 ({HostedMB.Client3Port.PortName}): {HostedMB.HostedSlave3RequestNum} requests";
+                    HostedMB.SlavesCreated = new bool[3];
+                    if (!Client2Settings())
+                    {
+                        return;
+                    };
+
+                    if (!Client3Settings())
+                    {
+                        return;
+                    }
+
+                    await Task.Run(() => HostedMB.CreateHostedSlave1And2And3());
+                    HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue, (string)Client3Serial.SelectedValue };
                 }
-                caption = "Number of client requests received";
-                button = MessageBoxButton.OK;
-                icon = MessageBoxImage.Information;
-                MessageBox.Show(text, caption, button, icon);
-                GenContinue = false;
-                Start.Content = "Start";
-                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+
+                if ((bool)LiveInput.IsChecked)
+                {
+                    if (!Live())
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    Generated();
+                }
+
+                Start.Content = "Stop";
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
+
+                // The process has a set duration
+                if ((bool)DurationCheckbox.IsChecked)
+                {
+                    int hours = Convert.ToInt32(Hours.Text);
+                    int minutes = Convert.ToInt32(Minutes.Text);
+
+                    _time = TimeSpan.FromMinutes(hours * 60 + minutes);
+
+                    _timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+                    {
+                        Timer.Text = _time.ToString("c");
+                        if (_time == TimeSpan.Zero) _timer.Stop();
+                        _time = _time.Add(TimeSpan.FromSeconds(-1));
+                    }, Application.Current.Dispatcher);
+
+                    _timer.Start();
+
+                    await Task.Run(() => EndAfterDuration(hours, minutes));
+
+                    Start.Content = "Start";
+                    Start.IsEnabled = true;
+                    Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+                    EnableDisableSettings();
+                }
+
             }
+            else
+            {
+                tokenSource.Cancel();
+
+                while (!ProcessKilled)
+                {
+
+                }
+
+                Start.Content = "Start";
+                Start.IsEnabled = true;
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+                EnableDisableSettings();
+            }
+        }
+
+        /// <summary>
+        /// False: Process running
+        /// </summary>
+        public static bool ProcessKilled = false;
+
+        /// <summary>
+        /// Ends the program after a certain period of time
+        /// </summary>
+        /// <param name="hours"></param>
+        /// <param name="minutes"></param>
+        private static void EndAfterDuration(int hours, int minutes)
+        {
+            int _hours = 3600000 * hours;
+            int _minutes = 60000 * minutes;
+            Thread.Sleep(_hours + _minutes);
+            tokenSource.Cancel();
+        }
+
+        /// <summary>
+        /// Sets client 1's settings
+        /// </summary>
+        private bool Client1Settings()
+        {
+            if (TestSerialPort((string)Client1Serial.SelectedValue))
+            {
+                HostedMB.Client1Port = new SerialPort()
+                {
+                    PortName = (string)Client1Serial.SelectedValue,
+                    BaudRate = Convert.ToInt32(Client1BaudRate.Text),
+                    DataBits = Convert.ToInt32(Client1DataBits.Text)
+                };
+                switch (Client1ParityComboBox.Text)
+                {
+                    case "None":
+                        HostedMB.Client1Port.Parity = Parity.None;
+                        break;
+                    case "Odd":
+                        HostedMB.Client1Port.Parity = Parity.Odd;
+                        break;
+                    case "Even":
+                        HostedMB.Client1Port.Parity = Parity.Even;
+                        break;
+                }
+                switch (Client1StopBitsComboBox.Text)
+                {
+                    case "1":
+                        HostedMB.Client1Port.StopBits = StopBits.One;
+                        break;
+                    case "2":
+                        HostedMB.Client1Port.StopBits = StopBits.Two;
+                        break;
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Sets client 2's settings
+        /// </summary>
+        private bool Client2Settings()
+        {
+            if (TestSerialPort((string)Client2Serial.SelectedValue))
+            {
+                HostedMB.Client2Port = new SerialPort()
+                {
+                    PortName = (string)Client2Serial.SelectedValue,
+                    BaudRate = Convert.ToInt32(Client2BaudRate.Text),
+                    DataBits = Convert.ToInt32(Client2DataBits.Text)
+                };
+                switch (Client2ParityComboBox.Text)
+                {
+                    case "None":
+                        HostedMB.Client2Port.Parity = Parity.None;
+                        break;
+                    case "Odd":
+                        HostedMB.Client2Port.Parity = Parity.Odd;
+                        break;
+                    case "Even":
+                        HostedMB.Client2Port.Parity = Parity.Even;
+                        break;
+                }
+                switch (Client2StopBitsComboBox.Text)
+                {
+                    case "1":
+                        HostedMB.Client2Port.StopBits = StopBits.One;
+                        break;
+                    case "2":
+                        HostedMB.Client2Port.StopBits = StopBits.Two;
+                        break;
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Sets client 3's settings
+        /// </summary>
+        private bool Client3Settings()
+        {
+            if (TestSerialPort((string)Client3Serial.SelectedValue))
+            {
+                HostedMB.Client3Port = new SerialPort()
+                {
+                    PortName = (string)Client3Serial.SelectedValue,
+                    BaudRate = Convert.ToInt32(Client3BaudRate.Text),
+                    DataBits = Convert.ToInt32(Client3DataBits.Text)
+                };
+                switch (Client3ParityComboBox.Text)
+                {
+                    case "None":
+                        HostedMB.Client3Port.Parity = Parity.None;
+                        break;
+                    case "Odd":
+                        HostedMB.Client3Port.Parity = Parity.Odd;
+                        break;
+                    case "Even":
+                        HostedMB.Client3Port.Parity = Parity.Even;
+                        break;
+                }
+                switch (Client3StopBitsComboBox.Text)
+                {
+                    case "1":
+                        HostedMB.Client3Port.StopBits = StopBits.One;
+                        break;
+                    case "2":
+                        HostedMB.Client3Port.StopBits = StopBits.Two;
+                        break;
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Starts accepting Live input for the MMS
+        /// </summary>
+        /// <returns></returns>
+        private bool Live()
+        {
+            // Checks if the selected master port is being used
+            if (!TestSerialPort((string)SerialChooseIED.SelectedValue))
+            {
+                return false;
+            }
+            #region Hosted Master Port settings
+            HostedMB.HostedMasterPort = new SerialPort()
+            {
+                PortName = (string)SerialChooseIED.SelectedItem,
+                BaudRate = Convert.ToInt32(BaudRate.Text),
+                DataBits = Convert.ToInt32(DataBits.Text),
+            };
+            switch (ParityComboBox.Text)
+            {
+                case "None":
+                    HostedMB.HostedMasterPort.Parity = Parity.None;
+                    break;
+                case "Odd":
+                    HostedMB.HostedMasterPort.Parity = Parity.Odd;
+                    break;
+                case "Even":
+                    HostedMB.HostedMasterPort.Parity = Parity.Even;
+                    break;
+            }
+            switch (StopBitsComboBox.Text)
+            {
+                case "1":
+                    HostedMB.HostedMasterPort.StopBits = StopBits.One;
+                    break;
+                case "2":
+                    HostedMB.HostedMasterPort.StopBits = StopBits.Two;
+                    break;
+            }
+            HostedMB.TimeOutValue = Convert.ToInt32(Timeout.Text);
+
+            Task task = new Task(() => HostedMB.Live(ct));
+            task.Start();
+            return true;
+            #endregion
+        }
+
+        /// <summary>
+        /// Starts generating values for the MMS
+        /// </summary>
+        private void Generated()
+        {
+            GenItemsString = new List<string>();
+            foreach (var item in GeneratedItemsCheckbox)
+            {
+                if ((bool)item.IsChecked)
+                {
+                    GenItemsString.Add(item.Name);
+                }
+            }
+            Task task = new Task(() => HostedMB.Generated(ct));
+            task.Start();
         }
 
         /// <summary>
@@ -565,68 +709,76 @@ namespace MMS
             InputSettingsRow1.IsEnabled = !InputSettingsRow1.IsEnabled;
             InputSettingsRow2.IsEnabled = !InputSettingsRow2.IsEnabled;
             RefreshSettings.IsEnabled = !RefreshSettings.IsEnabled;
+            LogLocation.IsEnabled = !LogLocation.IsEnabled;
+            Duration.IsEnabled = !Duration.IsEnabled;
             ClientSettingsRow1.IsEnabled = !ClientSettingsRow1.IsEnabled;
             ClientSettingsRow2.IsEnabled = !ClientSettingsRow2.IsEnabled;
             PIMConnected.IsEnabled = !PIMConnected.IsEnabled;
         }
 
         /// <summary>
-        /// Kills currently running background processes for clients
+        /// Contains all the textboxes in the program
         /// </summary>
-        public static void KillThreads()
-        {
-            if (HostedMB.HostedMasterPort != null)
-            {
-                HostedMB.HostedMasterPort.Close();
-            }
-            if (HostedMB.Client1Port != null)
-            {
-                HostedMB.Client1Port.Close();
-            }
-            if (HostedMB.Client2Port != null)
-            {
-                HostedMB.Client2Port.Close();
-            }
-            if (HostedMB.Client3Port != null)
-            {
-                HostedMB.Client3Port.Close();
-            }
-        }
+        private TextBox[] TextBoxArray;
 
         /// <summary>
-        /// Sets the settings for client 2
+        /// Checks hours and minutes to see if they're natural numbers, or empty
         /// </summary>
-        private void Client2Settings()
+        /// <param name="item"></param>
+        /// <returns>True: Nautral number or empty</returns>
+        private bool TextBoxCheck(TextBox item)
         {
-            HostedMB.Client2Port = new SerialPort()
+            try
             {
-                PortName = (string)Client2Serial.SelectedValue,
-                BaudRate = Convert.ToInt32(Client2BaudRate.Text),
-                DataBits = Convert.ToInt32(Client2DataBits.Text)
-            };
-            switch (Client2ParityComboBox.Text)
-            {
-                case "None":
-                    HostedMB.Client2Port.Parity = Parity.None;
-                    break;
-                case "Odd":
-                    HostedMB.Client2Port.Parity = Parity.Odd;
-                    break;
-                case "Even":
-                    HostedMB.Client2Port.Parity = Parity.Even;
-                    break;
+                // Hours and minutes need to allow zero values
+                if (item.Name == "Hours" || item.Name == "Minutes")
+                {
+                    TextBox[] testArray = new TextBox[] { Hours, Minutes };
+                    if (testArray[0].Text == "" && testArray[1].Text == "")
+                    {
+                        return true;
+                    }
+                    List<int> testArrayValues = new List<int>();
+                    foreach (var thing in testArray)
+                    {
+                        try
+                        {
+                            testArrayValues.Add(Convert.ToInt32(thing.Text));
+                        }
+                        catch (Exception)
+                        {
+                            testArrayValues.Add(-1);
+                        }
+                    }
+                    if (testArrayValues[0] <= 0 && testArrayValues[1] <= 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                int test = Convert.ToInt32(item.Text);
+                if (test <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+
             }
-            switch (Client2StopBitsComboBox.Text)
+            catch (Exception)
             {
-                case "1":
-                    HostedMB.Client2Port.StopBits = StopBits.One;
-                    break;
-                case "2":
-                    HostedMB.Client2Port.StopBits = StopBits.Two;
-                    break;
+                if (item.Text != "")
+                {
+                    return false;
+                }
+                return true;
             }
         }
-
         /// <summary>
         /// Checks that the refresh rate is available
         /// </summary>
@@ -634,10 +786,14 @@ namespace MMS
         /// <param name="e"></param>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
+            List<bool> StatusBool = new List<bool>(); // True means pass
+            if (TextBoxArray != null)
             {
-                int test = Convert.ToInt32(((TextBox)sender).Text);
-                if (test <= 0)
+                foreach (var item in TextBoxArray)
+                {
+                    StatusBool.Add(TextBoxCheck(item));
+                }
+                if (StatusBool.Contains(false))
                 {
                     WarningTextBlock.Visibility = Visibility.Visible;
                 }
@@ -645,40 +801,10 @@ namespace MMS
                 {
                     WarningTextBlock.Visibility = Visibility.Collapsed;
                 }
+                CheckStartButton();
             }
-            catch (Exception)
-            {
-                if (WarningTextBlock != null)
-                {
-                    WarningTextBlock.Visibility = Visibility.Visible;
-                }
-            }
-            try
-            {
-                SerialChoose_SelectionChanged();
-            }
-            catch (Exception)
-            {
-            }
-
         }
 
-        /// <summary>
-        /// True: Continue. False: Stop current process
-        /// </summary>
-        public static bool GenContinue = true;
-
-        /// <summary>
-        /// Kills all the threads and the program
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            KillThreads();
-            GenContinue = false;
-            Application.Current.Shutdown();
-        }
         /// <summary>
         /// Shows the user the com0com settings or downloads it for them in a browser
         /// </summary>
@@ -696,6 +822,99 @@ namespace MMS
                 Process.Start(new ProcessStartInfo("https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/powersdr-iq/setup_com0com_W7_x64_signed.exe"));
                 e.Handled = true;
             }
+        }
+
+        /// <summary>
+        /// True: Logging is on. False: Logging if off
+        /// </summary>
+        public static bool LogBoolChecked;
+
+        /// <summary>
+        /// Shows LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LogBool_Checked(object sender, RoutedEventArgs e)
+        {
+            LogBoolChecked = true;
+            LoggerInfo.Visibility = Visibility.Visible;
+            CheckStartButton();
+        }
+
+        /// <summary>
+        /// Hides LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LogBool_Unchecked(object sender, RoutedEventArgs e)
+        {
+            LogBoolChecked = false;
+            LoggerInfo.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Checks if SelectFileNameLocation can be enabled
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Time_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            List<bool> StatusBoolList = new List<bool>();
+            if (Hours != null && Minutes != null)
+            {
+                TextBox[] TextBoxArray = new TextBox[] { Hours, Minutes };
+
+                foreach (var item in TextBoxArray)
+                {
+                    if (item.Text == "")
+                    {
+                        StatusBoolList.Add(false);
+                    }
+                    else
+                    {
+                        StatusBoolList.Add(TextBoxCheck(item));
+                    }
+                }
+                TextBox_TextChanged(sender, e);
+            }
+
+        }
+
+        /// <summary>
+        /// Selects the folder location for the logs
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectFileNameLocation_Click(object sender, RoutedEventArgs e)
+        {
+            System.IO.Directory.CreateDirectory("C:\\Users\\15028598738\\Documents\\MMS Log");
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            dialog.InitialDirectory = "C:\\Users\\15028598738\\Documents\\MMS Log";
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                HostedMB.LogDirectory = dialog.FileName;
+                SelectedFolder.Text = HostedMB.LogDirectory;
+            }
+            CheckStartButton();
+        }
+
+        /// <summary>
+        /// Shows LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DurationCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (LoggerInfo.Visibility == Visibility.Visible)
+            {
+                LoggerInfo.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                LoggerInfo.Visibility = Visibility.Visible;
+            }
+            CheckStartButton();
         }
     }
 }
