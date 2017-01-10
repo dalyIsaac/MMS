@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Windows.Threading;
 
 namespace MMS
 {
@@ -121,23 +122,20 @@ namespace MMS
                         int length = clients.Count(s => s != null);
                         if ((length == 3 && (bool)ThreeClients.IsChecked) || (length == 2 && (bool)TwoClients.IsChecked) || (length == 1 && (bool)OneClient.IsChecked))
                         {
-                            if (HostedMB.LogDirectory != null)
+                            if (!(bool)DurationCheckbox.IsChecked)
                             {
-                                if (!(bool)DurationCheckbox.IsChecked)
+                                Start.IsEnabled = true;
+                            }
+                            else
+                            {
+                                if (Hours.Text != "" && Minutes.Text != "")
                                 {
                                     Start.IsEnabled = true;
                                 }
                                 else
                                 {
-                                    if (Hours.Text != "" && Minutes.Text != "")
-                                    {
-                                        Start.IsEnabled = true;
-                                    }
-                                    else
-                                    {
-                                        Start.IsEnabled = false;
-                                    }
-                                }   
+                                    Start.IsEnabled = false;
+                                }
                             }
                         }
                         else
@@ -383,9 +381,14 @@ namespace MMS
         private CancellationToken ct = new CancellationToken();
 
         /// <summary>
-        /// Used to notify when the start button can be enabled again
+        /// Dispatcher timer
         /// </summary>
-        public static bool ProcessKilled = false;
+        private DispatcherTimer _timer;
+        
+        /// <summary>
+        /// Time
+        /// </summary>
+        private TimeSpan _time;
 
         /// <summary>
         /// Starts or kills the test
@@ -396,7 +399,6 @@ namespace MMS
         {
             if ((string)Start.Content == "Start")
             {
-                ProcessKilled = false;
                 // Assigns the token source
                 tokenSource = new CancellationTokenSource();
                 ct = tokenSource.Token;
@@ -409,8 +411,7 @@ namespace MMS
                 if ((bool)OneClient.IsChecked)
                 {
                     HostedMB.SlavesCreated = new bool[1];
-                    Task Create = new Task(HostedMB.CreateHostedSlave1);
-                    Create.Start();
+                    await Task.Run(() => HostedMB.CreateHostedSlave1());
                     HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue };
                 }
                 else if ((bool)TwoClients.IsChecked)
@@ -421,8 +422,7 @@ namespace MMS
                         return;
                     }
 
-                    Task Create = new Task(HostedMB.CreateHostedSlave1And2);
-                    Create.Start();
+                    await Task.Run(() => HostedMB.CreateHostedSlave1And2());
                     HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue };
                 }
                 else
@@ -438,14 +438,8 @@ namespace MMS
                         return;
                     }
 
-                    Task Create = new Task(HostedMB.CreateHostedSlave1And2And3);
-                    Create.Start();
+                    await Task.Run(() => HostedMB.CreateHostedSlave1And2And3());
                     HostedMB.OutputPorts = new string[] { (string)Client1Serial.SelectedValue, (string)Client2Serial.SelectedValue, (string)Client3Serial.SelectedValue };
-                }
-
-                while (HostedMB.SlavesCreated.Contains(false))
-                {
-
                 }
 
                 if ((bool)LiveInput.IsChecked)
@@ -462,17 +456,32 @@ namespace MMS
 
                 Start.Content = "Stop";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
-                int hours = Convert.ToInt32(Hours.Text);
-                int minutes = Convert.ToInt32(Minutes.Text);
 
-                await Task.Run(() => EndAfterDuration(hours, minutes));
-                //Task Stop = new Task(() => EndAfterDuration(hours, minutes));
-                //Stop.Start();
+                // The process has a set duration
+                if ((bool)DurationCheckbox.IsChecked)
+                {
+                    int hours = Convert.ToInt32(Hours.Text);
+                    int minutes = Convert.ToInt32(Minutes.Text);
 
-                Start.Content = "Start";
-                Start.IsEnabled = true;
-                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
-                EnableDisableSettings();
+                    _time = TimeSpan.FromMinutes(hours * 60 + minutes);
+
+                    _timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+                    {
+                        Timer.Text = _time.ToString("c");
+                        if (_time == TimeSpan.Zero) _timer.Stop();
+                        _time = _time.Add(TimeSpan.FromSeconds(-1));
+                    }, Application.Current.Dispatcher);
+
+                    _timer.Start();
+
+                    await Task.Run(() => EndAfterDuration(hours, minutes));
+
+                    Start.Content = "Start";
+                    Start.IsEnabled = true;
+                    Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+                    EnableDisableSettings();
+                }
+
             }
             else
             {
@@ -489,6 +498,11 @@ namespace MMS
                 EnableDisableSettings();
             }
         }
+
+        /// <summary>
+        /// False: Process running
+        /// </summary>
+        public static bool ProcessKilled = false;
 
         /// <summary>
         /// Ends the program after a certain period of time
@@ -863,7 +877,7 @@ namespace MMS
                 }
                 TextBox_TextChanged(sender, e);
             }
-            
+
         }
 
         /// <summary>
@@ -873,8 +887,10 @@ namespace MMS
         /// <param name="e"></param>
         private void SelectFileNameLocation_Click(object sender, RoutedEventArgs e)
         {
+            System.IO.Directory.CreateDirectory("C:\\Users\\15028598738\\Documents\\MMS Log");
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
+            dialog.InitialDirectory = "C:\\Users\\15028598738\\Documents\\MMS Log";
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 HostedMB.LogDirectory = dialog.FileName;

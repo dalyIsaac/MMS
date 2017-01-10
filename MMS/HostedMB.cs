@@ -42,10 +42,6 @@ namespace MMS
         /// </summary>
         private static void StartListening()
         {
-            //if (client)
-            //{
-
-            //}
             Task Listen1 = new Task(HostedSlave1.Listen);
             Listen1.Start();
             if (HostedSlave2 != null)
@@ -170,7 +166,7 @@ namespace MMS
         /// <summary>
         /// Contains the log's directory
         /// </summary>
-        public static string LogDirectory;
+        public static string LogDirectory = "C:\\Users\\15028598738\\Documents\\MMS Log";
 
         #region Live
         /// <summary>

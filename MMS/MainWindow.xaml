@@ -424,6 +424,8 @@
             <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,8">
                 <Rectangle Style="{StaticResource SeparatorLine}"/>
                 <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
+
+                <TextBlock Name="Timer" FontSize="30" Text="HelloWorld" HorizontalAlignment="Center"/>
             </StackPanel>
 
             <!--WarningTextBlock-->
@@ -436,7 +438,7 @@
                 <Rectangle Style="{StaticResource TitleLine}"/>
                 
                 <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Change log output location" Width="240"  HorizontalAlignment="Center" Height="20" Margin="0,0,0,8" />
-                <TextBlock Name="SelectedFolder" HorizontalAlignment="Center"/>
+                <TextBlock Name="SelectedFolder" HorizontalAlignment="Center" Text="C:\\Users\\15028598738\\Documents\\MMS Log"/>
             </StackPanel>
 
             <StackPanel Grid.Column="2" Grid.Row="2" Name="Duration">
