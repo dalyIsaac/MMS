@@ -48,10 +48,16 @@ namespace MMS
             //}
             Task Listen1 = new Task(HostedSlave1.Listen);
             Listen1.Start();
-            //Task Listen2 = new Task(HostedSlave2.Listen);
-            //Listen2.Start();
-            //Task Listen3 = new Task(HostedSlave3.Listen);
-            //Listen3.Start();
+            if (HostedSlave2 != null)
+            {
+                Task Listen2 = new Task(HostedSlave2.Listen);
+                Listen2.Start();
+                if (HostedSlave3 != null)
+                {
+                    Task Listen3 = new Task(HostedSlave3.Listen);
+                    Listen3.Start();
+                }
+            }
         }
 
         #region Hosted Slave 1

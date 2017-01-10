@@ -123,7 +123,21 @@ namespace MMS
                         {
                             if (HostedMB.LogDirectory != null)
                             {
-                                Start.IsEnabled = true;
+                                if (!(bool)DurationCheckbox.IsChecked)
+                                {
+                                    Start.IsEnabled = true;
+                                }
+                                else
+                                {
+                                    if (Hours.Text != "" && Minutes.Text != "")
+                                    {
+                                        Start.IsEnabled = true;
+                                    }
+                                    else
+                                    {
+                                        Start.IsEnabled = false;
+                                    }
+                                }   
                             }
                         }
                         else
@@ -448,8 +462,17 @@ namespace MMS
 
                 Start.Content = "Stop";
                 Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff5252"));
-                Task Stop = new Task(EndAfterDuration);
+                int hours = Convert.ToInt32(Hours.Text);
+                int minutes = Convert.ToInt32(Minutes.Text);
+
+                await Task.Run(() => EndAfterDuration(hours, minutes));
+                //Task Stop = new Task(() => EndAfterDuration(hours, minutes));
                 //Stop.Start();
+
+                Start.Content = "Start";
+                Start.IsEnabled = true;
+                Start.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#33cc57"));
+                EnableDisableSettings();
             }
             else
             {
@@ -467,9 +490,16 @@ namespace MMS
             }
         }
 
-        private static void EndAfterDuration()
+        /// <summary>
+        /// Ends the program after a certain period of time
+        /// </summary>
+        /// <param name="hours"></param>
+        /// <param name="minutes"></param>
+        private static void EndAfterDuration(int hours, int minutes)
         {
-            Thread.Sleep(5000);
+            int _hours = 3600000 * hours;
+            int _minutes = 60000 * minutes;
+            Thread.Sleep(_hours + _minutes);
             tokenSource.Cancel();
         }
 
@@ -677,10 +707,16 @@ namespace MMS
         /// </summary>
         private TextBox[] TextBoxArray;
 
+        /// <summary>
+        /// Checks hours and minutes to see if they're natural numbers, or empty
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>True: Nautral number or empty</returns>
         private bool TextBoxCheck(TextBox item)
         {
             try
             {
+                // Hours and minutes need to allow zero values
                 if (item.Name == "Hours" || item.Name == "Minutes")
                 {
                     TextBox[] testArray = new TextBox[] { Hours, Minutes };
@@ -709,7 +745,6 @@ namespace MMS
                         return true;
                     }
                 }
-
                 int test = Convert.ToInt32(item.Text);
                 if (test <= 0)
                 {
@@ -743,13 +778,6 @@ namespace MMS
                 foreach (var item in TextBoxArray)
                 {
                     StatusBool.Add(TextBoxCheck(item));
-                    try
-                    {
-                        CheckStartButton();
-                    }
-                    catch (Exception)
-                    {
-                    }
                 }
                 if (StatusBool.Contains(false))
                 {
@@ -759,6 +787,7 @@ namespace MMS
                 {
                     WarningTextBlock.Visibility = Visibility.Collapsed;
                 }
+                CheckStartButton();
             }
         }
 
@@ -810,16 +839,6 @@ namespace MMS
         }
 
         /// <summary>
-        /// Hours to add to the current time
-        /// </summary>
-        private static int HoursToAdd;
-
-        /// <summary>
-        /// Minutes to add to the current time
-        /// </summary>
-        private static int MinsToAdd;
-
-        /// <summary>
         /// Checks if SelectFileNameLocation can be enabled
         /// </summary>
         /// <param name="sender"></param>
@@ -842,13 +861,9 @@ namespace MMS
                         StatusBoolList.Add(TextBoxCheck(item));
                     }
                 }
-                if (!StatusBoolList.Contains(false))
-                {
-                    HoursToAdd = Convert.ToInt32(Hours.Text);
-                    MinsToAdd = Convert.ToInt32(Minutes.Text);
-                }
                 TextBox_TextChanged(sender, e);
             }
+            
         }
 
         /// <summary>
@@ -864,6 +879,24 @@ namespace MMS
             {
                 HostedMB.LogDirectory = dialog.FileName;
                 SelectedFolder.Text = HostedMB.LogDirectory;
+            }
+            CheckStartButton();
+        }
+
+        /// <summary>
+        /// Shows LoggerInfo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DurationCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (LoggerInfo.Visibility == Visibility.Visible)
+            {
+                LoggerInfo.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                LoggerInfo.Visibility = Visibility.Visible;
             }
             CheckStartButton();
         }

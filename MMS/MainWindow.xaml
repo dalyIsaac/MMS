@@ -73,8 +73,8 @@
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
-            
-            <StackPanel Grid.Row="3" Name="InputSettingsRow2">
+
+            <StackPanel Grid.Row="2" Name="InputSettingsRow2">
                 <Rectangle Style="{StaticResource SeparatorLine}"/>
 
                 <!--LiveInputSettings-->
@@ -169,10 +169,6 @@
 
                 </StackPanel>
 
-            </StackPanel>
-
-            <StackPanel Grid.Row="4" >
-                <Rectangle Style="{StaticResource SeparatorLine}"/>
             </StackPanel>
 
             <!--com0com settings or link-->
@@ -436,10 +432,17 @@
             <!--Logger-->
             <TextBlock Text="Logger" FontSize="20" HorizontalAlignment="Center" Grid.Column="2"/>
 
-            <StackPanel Grid.Column="2" Grid.Row="1" Name="Duration">
+            <StackPanel Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" Name="LogLocation">
                 <Rectangle Style="{StaticResource TitleLine}"/>
+                
+                <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Change log output location" Width="240"  HorizontalAlignment="Center" Height="20" Margin="0,0,0,8" />
+                <TextBlock Name="SelectedFolder" HorizontalAlignment="Center"/>
+            </StackPanel>
 
-                <StackPanel Name="LoggerInfo" VerticalAlignment="Center">
+            <StackPanel Grid.Column="2" Grid.Row="2" Name="Duration">
+                <Rectangle Style="{StaticResource SeparatorLine}"/>
+                <CheckBox Content="Run for a set duration" Name="DurationCheckbox" Checked="DurationCheckbox_Checked" Unchecked="DurationCheckbox_Checked" HorizontalAlignment="Center"/>
+                <StackPanel Name="LoggerInfo" VerticalAlignment="Center" Visibility="Collapsed">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <StackPanel Orientation="Vertical" Margin="8,0,0,8">
                             <TextBlock Text="Hours" />
@@ -454,14 +457,7 @@
                             <TextBox Name="Minutes" TextChanged="Time_TextChanged"/>
                         </StackPanel>
                     </StackPanel>
-                    
                 </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2" Grid.Row="2" HorizontalAlignment="Center" Name="LogLocation">
-                <Rectangle Style="{StaticResource SeparatorLine}"/>
-                <Button Name="SelectFileNameLocation" Click="SelectFileNameLocation_Click" Content="Change log output location" Width="240"  HorizontalAlignment="Center" Height="20" Margin="0,0,0,8" />
-                <TextBlock Name="SelectedFolder" HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
     </ScrollViewer>
