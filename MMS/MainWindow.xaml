@@ -425,7 +425,7 @@
                 <Rectangle Style="{StaticResource SeparatorLine}"/>
                 <Button Content="Start" Name="Start" IsEnabled="False" Click="Start_Click" Background="#33cc57" Width="100" HorizontalAlignment="Center" Margin="380,0,0,0"/>
 
-                <TextBlock Name="Timer" FontSize="30" Text="HelloWorld" HorizontalAlignment="Center"/>
+                <TextBlock Name="Timer" FontSize="30" HorizontalAlignment="Center"/>
             </StackPanel>
 
             <!--WarningTextBlock-->
